@@ -69,7 +69,7 @@ let lb = null, picker = null;
 const TABS = [['overview', 'Overview'], ['journal', 'Journal'], ['photos', 'Photos'], ['pages', 'Page text'], ['experiences', 'Experiences'], ['places', 'Places'], ['reviews', 'Reviews'], ['settings', 'Site settings']];
 const SOCIAL_NAMES = { facebook: 'Facebook', instagram: 'Instagram', tripadvisor: 'TripAdvisor', youtube: 'YouTube' };
 const PAGE_GROUPS = [
-  ['Home page', null, ['home_about', 'home_stay', 'home_cuisine', 'home_room', 'home_band']],
+  ['Home page', null, ['home_about', 'home_f1', 'home_f2', 'home_f3', 'home_f4', 'home_room', 'home_stay', 'home_cuisine', 'home_band']],
   ['About', 'about', ['about_devra', 'about_hosts']],
   ['The stay', 'stay', ['stay_leisure', 'stay_rooms', 'stay_band', 'stay_facilities', 'stay_perfect']],
   ['Experiences', 'experiences', ['exp_intro', 'exp_culinary', 'exp_community']],
@@ -120,6 +120,31 @@ function normName(s) {
 }
 function at(t) { const ws = String(t || '').trim().split(/\s+/); if (ws.length < 2) return esc(t); const last = ws.pop(); return esc(ws.join(' ')) + ' <em class="ital">' + esc(last) + '</em>'; }
 function rise(text, accent) { const ws = String(text || '').split(/\s+/).filter(Boolean); return ws.map((w, i) => '<span class="w' + (accent && i === ws.length - 1 && ws.length > 1 ? ' accent' : '') + '"><span style="--i:' + i + '">' + esc(w) + '</span></span>').join(' '); }
+
+/* ---------- Line icons (24px grid) ---------- */
+const ICONS = {
+  instagram: 'M7 2.5h10A4.5 4.5 0 0 1 21.5 7v10a4.5 4.5 0 0 1-4.5 4.5H7A4.5 4.5 0 0 1 2.5 17V7A4.5 4.5 0 0 1 7 2.5ZM15.8 12a3.8 3.8 0 1 1-7.6 0 3.8 3.8 0 0 1 7.6 0ZM17.4 6.6h.01',
+  pool: 'M9 14V5.5a2 2 0 0 0-2-2M15 14V5.5a2 2 0 0 0-2-2M9 7h6M9 10.5h6M2 17c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 21c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2',
+  snow: 'M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 2 3-2M9 20l3-2 3 2',
+  wifi: 'M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19.5h.01',
+  laundry: 'M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0Z',
+  car: 'M5 11l1.6-4.2A2 2 0 0 1 8.5 5.5h7a2 2 0 0 1 1.9 1.3L19 11M3 17v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4H3ZM6 17v2.5M18 17v2.5M7 14h.01M17 14h.01',
+  plane: 'M2.5 13.5 21 7.2a1.6 1.6 0 0 0-1.4-2.9L4.2 9.6l-1.7-2L1 8.2l1.5 5.3ZM8 11.6l2.6 6.9 2.3-1-1-7.6M3 21h18',
+  leaf: 'M11 20a7 7 0 0 1-7-7c0-5 4-9 16-10-1 12-5 17-9 17ZM4 21c3-6 7-9 11-11',
+  lake: 'M2 17c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 21c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M7 12a5 5 0 0 1 10 0M12 3.5v2M5.2 6.2l1.4 1.4M18.8 6.2l-1.4 1.4',
+  palace: 'M3 21h18M4 21v-9h16v9M8 12V9a4 4 0 0 1 8 0v3M12 5V3M10 21v-3a2 2 0 0 1 4 0v3M4 12a2 2 0 0 1 4 0M16 12a2 2 0 0 1 4 0M6.5 15.5h1M16.5 15.5h1',
+  temple: 'M12 2v2M8.5 9 12 4l3.5 5M6 13l6-4 6 4M5 21v-8h14v8M3 21h18M10 21v-4h4v4',
+  fort: 'M3 21h18M4 21V8h2.5v2.5H9V8h2v2.5h2V8h2v2.5h2.5V8H20v13M10 21v-4a2 2 0 0 1 4 0v4'
+};
+function icon(name) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (ICONS[name] || ICONS.leaf) + '"></path></svg>'; }
+function amenityIcon(t) { t = String(t).toLowerCase(); return /airport|railway|pickup|station/.test(t) ? 'plane' : /pool|swim/.test(t) ? 'pool' : /air-?condition|\bac\b/.test(t) ? 'snow' : /wi-?fi|internet/.test(t) ? 'wifi' : /laundry|wash/.test(t) ? 'laundry' : /taxi|cab|car/.test(t) ? 'car' : 'leaf'; }
+function placeIcon(t) { t = String(t).toLowerCase(); return /fort|kumbhal|sanctuary/.test(t) ? 'fort' : /temple|eklingji|jagdish/.test(t) ? 'temple' : /palace|haveli|museum/.test(t) ? 'palace' : /lake|sagar|pichola/.test(t) ? 'lake' : 'leaf'; }
+function ornament(cls) {
+  return '<span class="ornament' + (cls ? ' ' + cls : '') + '" aria-hidden="true"><svg viewBox="0 0 132 26"><path class="o-line" d="M0 15H46M86 15H132"></path>' +
+    '<path class="o-leaf" d="M47 16c6-2 10 0 13 6-6 1-10-1-13-6ZM85 16c-6-2-10 0-13 6 6 1 10-1 13-6Z"></path>' +
+    '<path class="o-petal" d="M66 2c5 5 5 13 0 20-5-7-5-15 0-20Z"></path><path class="o-petal" d="M57 8c6 1 9 7 9 14-6-1-10-6-9-14ZM75 8c-6 1-9 7-9 14 6-1 10-6 9-14Z" opacity=".78"></path></svg></span>';
+}
+function shead(eyebrow, title, lead) { return '<div class="shead" data-reveal>' + (eyebrow ? '<p class="eyebrow">' + esc(eyebrow) + '</p>' : '') + '<h2>' + at(title) + '</h2>' + ornament() + (lead ? '<p class="lead">' + esc(lead) + '</p>' : '') + '</div>'; }
 
 /* ---------- Photo rendering ---------- */
 function pic(ref, o) {
@@ -179,7 +204,8 @@ function header() {
     '<nav id="site-nav" class="site-nav" aria-label="Main">' + NAV.map(([k, l]) => '<a href="' + LINKS[k] + '"' + (cur === k && !isAdmin ? ' aria-current="page"' : '') + '>' + l + '</a>').join('') + '</nav>' +
     '<div class="head-actions">' +
     (isAdmin ? '<button type="button" class="btn btn--ghost btn--sm" data-act="leave-admin">View site</button>'
-      : (book ? '<a class="btn btn--primary btn--sm" href="' + esc(book) + '" target="_blank" rel="noopener">Book now</a>' : '')) +
+      : (book ? '<a class="btn btn--primary btn--sm" href="' + esc(book) + '" target="_blank" rel="noopener">Reserve now</a>' : '') +
+        (safeUrl((s.socials || {}).instagram) ? '<a class="ig-link" href="' + esc(safeUrl(s.socials.instagram)) + '" target="_blank" rel="noopener" aria-label="' + esc(name) + ' on Instagram">' + icon('instagram') + '</a>' : '')) +
     '<button class="menu-btn" type="button" data-act="menu" aria-expanded="false" aria-controls="site-nav">Menu</button>' +
     '</div></div></header>';
 }
@@ -214,17 +240,17 @@ function homeHero() {
     : '<canvas class="hero-art" data-birds="7" aria-hidden="true"></canvas>';
   const foot = slides.length > 1 ? '<div class="hero-foot"><p class="slide-cap" id="slide-cap">' + esc(caption(slides[0])) + '</p><div class="dots">' +
     slides.map((sl, i) => '<button type="button" class="dot' + (i === 0 ? ' is-on' : '') + '" data-act="slide" data-i="' + i + '" aria-label="Show photo ' + (i + 1) + '"><span></span></button>').join('') + '</div></div>' : '';
-  return '<section class="hero hero--home hero--' + heroTone + '" aria-labelledby="hero-title">' + bg +
+  return '<section class="hero hero--home hero--center hero--' + heroTone + '" aria-labelledby="hero-title">' + bg +
     '<div class="wrap hero-content"><p class="eyebrow fade-in">' + esc(s.tagline) + '</p><h1 id="hero-title" class="rise">' + rise(s.heroTitle, true) + '</h1>' +
     '<p class="hero-sub fade-in">' + esc(s.heroSubtitle) + '</p><div class="btn-row fade-in">' +
-    (book ? '<a class="btn btn--haldi" href="' + esc(book) + '" target="_blank" rel="noopener">Make a reservation <span class="arrow">→</span></a>' : '') +
-    '<a class="btn btn--ghost" href="' + LINKS.stay + '">Explore the stay</a></div></div>' + foot +
+    (book ? '<a class="btn btn--primary" href="' + esc(book) + '" target="_blank" rel="noopener">Reserve now <span class="arrow">→</span></a>' : '') +
+    '<a class="btn btn--ghost" href="' + LINKS.about + '">Know more</a></div></div>' + foot +
     '<span class="scroll-cue" aria-hidden="true"></span></section>';
 }
 function pageHero(eyebrow, title, lead, photoId) {
   const photo = hasPhoto(photoId);
   heroTone = photo ? 'photo' : 'art';
-  return '<section class="hero hero--page hero--' + heroTone + '">' +
+  return '<section class="hero hero--page hero--center hero--' + heroTone + '">' +
     (photo ? '<div class="hero-slides"><div class="slide is-on">' + pic(photoId, { eager: true }) + '</div></div><div class="hero-shade"></div>' : '<canvas class="hero-art" data-birds="4" aria-hidden="true"></canvas>') +
     '<div class="wrap hero-content">' + (eyebrow ? '<p class="eyebrow fade-in">' + esc(eyebrow) + '</p>' : '') + '<h1 class="rise">' + rise(title, true) + '</h1>' + (lead ? '<p class="hero-sub fade-in">' + esc(lead) + '</p>' : '') + '</div></section>';
 }
@@ -385,19 +411,82 @@ function quoteBand() {
 function emptyState(title, text, action) { return '<div class="empty"><h3>' + esc(title) + '</h3><p class="muted">' + esc(text) + '</p>' + (action || '') + '</div>'; }
 
 /* ---------- Pages ---------- */
-function viewHome() {
-  const s = CUR.settings;
+function factHtml(f) {
+  const m = String(f.value || '').trim().match(/^([0-9][0-9.,–\-]*°?\+?)\s*(.*)$/);
+  const num = m ? m[1] : String(f.value || ''), unit = m ? m[2] : '';
+  const countable = /^\d+°?$/.test(num);
+  return '<li><span class="fact-v"><span class="fact-num"' + (countable ? ' data-count="' + esc(num) + '"' : '') + '>' + esc(num) + '</span>' + (unit ? '<span class="fact-unit">' + esc(unit) + '</span>' : '') + '</span><span class="fact-l">' + esc(f.label) + '</span></li>';
+}
+function firstSentence(t, max) {
+  max = max || 170;
+  const p = firstPara(t).trim();
+  const m = p.match(/^.{40,}?[.!?](?=\s|$)/);
+  let out = m ? m[0].trim() : p;
+  if (out.length > max) out = out.slice(0, max - 3).replace(/[\s,;:]+\S*$/, '') + '…';
+  return out;
+}
+function sec(k) { return (CUR.sections || {})[k] || null; }
+/* Home, structured like the reference: welcome → numbered features → rooms & spaces → dining → amenities → nearby gems */
+function welcomeBand() {
+  const s = CUR.settings, x = sec('home_about');
+  if (!x) return '';
   const tour = safeUrl(s.tourUrl);
-  const factHtml = f => {
-    const m = String(f.value || '').trim().match(/^([0-9][0-9.,\u2013\-]*°?\+?)\s*(.*)$/);
-    const num = m ? m[1] : String(f.value || ''), unit = m ? m[2] : '';
-    const countable = /^\d+°?$/.test(num);
-    return '<li><span class="fact-v"><span class="fact-num"' + (countable ? ' data-count="' + esc(num) + '"' : '') + '>' + esc(num) + '</span>' + (unit ? '<span class="fact-unit">' + esc(unit) + '</span>' : '') + '</span><span class="fact-l">' + esc(f.label) + '</span></li>';
-  };
-  const facts = (s.facts || []).length ? '<div class="facts-wrap"><div class="wrap"><ul class="facts" id="facts">' + s.facts.map(factHtml).join('') + '</ul></div></div>' : '';
-  const intro = feature('home_about', { collage: true, badge: 'Atithi Devo Bhava · Guests are gods · ', watermark: 'देवरा',
-    extra: '<div class="btn-row"><a class="btn btn--primary" href="' + LINKS.about + '">More about Devra <span class="arrow">→</span></a>' + (tour ? '<a class="btn btn--ghost" href="' + esc(tour) + '" target="_blank" rel="noopener">Watch the virtual tour</a>' : '') + '</div>' });
-  return homeHero() + facts + intro + marquee() + tallCards() + photoBand('home_band', { more: [LINKS.stay + '#stay_rooms', 'See the rooms'] }) + expRail('Things to do at Devra') + mosaicBand() + reviewsBand() + journalBand() + routeBand() + bookBand();
+  const stats = (s.facts || []).length ? '<ul class="stats stagger" id="facts">' + s.facts.map(factHtml).join('') + '</ul>' : '';
+  return '<section class="band welcome" id="home_about"><div class="wrap"><div class="welcome-in" data-reveal>' + (x.eyebrow ? '<p class="eyebrow">' + esc(x.eyebrow) + '</p>' : '') + '<h2>' + at(x.title) + '</h2>' + ornament() +
+    '<div class="prose">' + paras(x.body) + '</div><div class="btn-row"><a class="btn btn--primary" href="' + LINKS.about + '">Know more <span class="arrow">→</span></a>' +
+    (tour ? '<a class="btn btn--ghost" href="' + esc(tour) + '" target="_blank" rel="noopener">Watch the virtual tour</a>' : '') + '</div></div>' + stats + '</div></section>';
+}
+const NROW_LINKS = { home_f1: ['stay', 'Explore the stay'], home_f2: ['udaipur', 'Explore Udaipur'], home_f3: ['experiences', 'Food & experiences'], home_f4: ['about', 'About Devra'] };
+function numberedRows() {
+  const keys = ['home_f1', 'home_f2', 'home_f3', 'home_f4'].filter(k => sec(k));
+  if (!keys.length) return '';
+  return '<section class="band band--soft"><div class="wrap">' + shead('Devra Udaipur', 'Heritage, nature and home', '') + '<div class="nrows">' + keys.map((k, i) => {
+    const x = sec(k), l = NROW_LINKS[k], f = i % 2;
+    return '<article class="nrow' + (f ? ' nrow--flip' : '') + '" id="' + k + '"><div class="nrow-media" data-reveal="' + (f ? 'right' : 'left') + '">' + pic(x.photo, { label: x.title }) + '</div>' +
+      '<div class="nrow-copy" data-reveal="' + (f ? 'left' : 'right') + '"><span class="nnum" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span>' + (x.eyebrow ? '<p class="eyebrow">' + esc(x.eyebrow) + '</p>' : '') + '<h3>' + esc(x.title) + '</h3>' + paras(x.body) +
+      (l ? '<a class="btn btn--ghost" href="' + LINKS[l[0]] + '">' + esc(l[1]) + ' <span class="arrow">→</span></a>' : '') + '</div></article>';
+  }).join('') + '</div></div></section>';
+}
+function spacesGrid() {
+  const items = [['home_room', LINKS.stay + '#stay_rooms', 'See the rooms'], ['stay_leisure', LINKS.stay + '#stay_leisure', 'See the lounges'], ['home_stay', LINKS.stay, 'Explore the estate'], ['stay_perfect', LINKS.stay + '#stay_perfect', 'Plan your stay']].filter(k => sec(k[0]));
+  if (!items.length) return '';
+  const pg = (CUR.pages || {}).stay || {};
+  return '<section class="band"><div class="wrap">' + shead('The stay', 'Rooms and spaces', pg.lead) + '<div class="suites stagger">' + items.map(([k, href, label]) => {
+    const x = sec(k);
+    return '<a class="suite" href="' + href + '">' + pic(x.photo, { label: x.title }) + '<div class="suite-body">' + (x.eyebrow ? '<p class="eyebrow">' + esc(x.eyebrow) + '</p>' : '') + '<h3>' + esc(x.title) + '</h3><p>' + esc(firstSentence(x.body, 120)) + '</p><span class="more">' + label + ' <span class="arrow">→</span></span></div></a>';
+  }).join('') + '</div></div></section>';
+}
+function diningSplit() {
+  const x = sec('home_cuisine');
+  if (!x) return '';
+  const sub = (sec('exp_culinary') || {}).title || '';
+  return '<section class="band band--soft"><div class="wrap split"><div class="split-media" data-reveal="left">' + pic(x.photo, { arch: true, label: x.title }) +
+    (x.photo2 && hasPhoto(x.photo2) ? '<div class="inset">' + pic(x.photo2, { label: x.title }) + '</div>' : '') + '</div>' +
+    '<div class="split-copy" data-reveal="right">' + (x.eyebrow ? '<p class="eyebrow">' + esc(x.eyebrow) + '</p>' : '') + '<h2>' + at(x.title) + '</h2>' + (sub ? '<p class="sub">' + esc(sub) + '</p>' : '') + ornament('ornament--left') +
+    '<div class="prose">' + paras(x.body) + '</div><a class="btn btn--primary" href="' + LINKS.experiences + '">Discover more <span class="arrow">→</span></a></div></div></section>';
+}
+function amenitiesBand() {
+  const x = sec('stay_facilities');
+  if (!x) return '';
+  const items = (x.items || []).filter(Boolean);
+  const feat = galleryItems(CUR).filter(m => m.featured).sort((a, b) => (a.rank || 99) - (b.rank || 99)).slice(0, 4);
+  return '<section class="band"><div class="wrap">' + shead(x.eyebrow || 'Amenities', x.title, firstSentence(x.body)) +
+    (items.length ? '<ul class="amen stagger">' + items.map(t => '<li><span class="ico">' + icon(amenityIcon(t)) + '</span><span>' + esc(t) + '</span></li>').join('') + '</ul>' : '') +
+    '<div class="amen-foot"><a class="text-link" href="' + LINKS.stay + '#stay_facilities">Learn more <span class="arrow">→</span></a></div>' +
+    (feat.length ? '<div class="strip stagger">' + galleryButtons(feat, 'home') + '</div>' : '') + '</div></section>';
+}
+function gemsBand() {
+  const all = CUR.places || [];
+  if (!all.length) return '';
+  const seen = {}, pick = [];
+  all.forEach(p => { const k = placeIcon(p.name); if (!seen[k] && pick.length < 4) { seen[k] = 1; pick.push(p); } });
+  all.forEach(p => { if (pick.length < 4 && pick.indexOf(p) < 0) pick.push(p); });
+  return '<section class="band band--soft"><div class="wrap">' + shead('Local attractions', 'Historic gems around Devra', '') + '<div class="gems stagger">' +
+    pick.map(p => '<a class="gem" href="' + LINKS.udaipur + '"><span class="ico">' + icon(placeIcon(p.name)) + '</span><h3>' + esc(p.name) + '</h3>' + (p.distance ? '<span class="dist">' + esc(p.distance) + '</span>' : '') + '<p>' + esc(p.text) + '</p></a>').join('') +
+    '</div><div class="center-row"><a class="btn btn--ghost" href="' + LINKS.udaipur + '">Explore Udaipur <span class="arrow">→</span></a></div></div></section>';
+}
+function viewHome() {
+  return homeHero() + welcomeBand() + numberedRows() + spacesGrid() + diningSplit() + amenitiesBand() + marquee() + gemsBand() + reviewsBand() + journalBand() + bookBand();
 }
 function viewAbout() { return pageHeroFor('about', 'About Devra') + feature('about_devra', { collage: true, badge: 'Atithi Devo Bhava · Guests are gods · ', watermark: 'देवरा' }) + quoteBand() + feature('about_hosts', { flip: true, soft: true }) + routeBand() + bookBand(); }
 function viewStay() {
@@ -406,10 +495,37 @@ function viewStay() {
   return pageHeroFor('stay', 'The stay') + feature('stay_leisure', { collage: true }) + feature('stay_rooms', { flip: true, soft: true, extra: cta }) + photoBand('stay_band', { full: true }) +
     feature('stay_facilities') + feature('stay_perfect', { flip: true, soft: true, chips: true }) + feature('home_cuisine', { more: [LINKS.experiences, 'More about our food'] }) + bookBand();
 }
+/* Experiences, structured like padmaajaipur.com/experiences: title + tagline + intro + photos → personalised list → tailor-made → location → outings → editorial rows */
 function viewExperiences() {
+  heroTone = null;
+  const s = CUR.settings, pg = (CUR.pages || {}).experiences || {};
+  const x = sec('exp_intro') || {};
+  const third = (sec('exp_culinary') || {}).photo;
+  const ehero = '<section class="ehero"><div class="wrap"><p class="eyebrow fade-in">' + esc(s.siteName || 'Devra Udaipur') + '</p><h1 class="rise">' + rise(pg.title || 'Experiences') + '</h1>' +
+    (pg.lead ? '<p class="tagline fade-in">' + esc(pg.lead) + '</p>' : '') + ornament() + '<div class="prose fade-in">' + paras(firstPara(x.body)) + '</div>' +
+    '<div class="ehero-media"><div class="m-side" data-reveal="left">' + pic(x.photo2, { label: 'Life at Devra' }) + '</div><div class="m-main fade-in">' + pic(x.photo, { eager: true, label: x.title || 'Experiences' }) + '</div><div class="m-side" data-reveal="right">' + pic(third, { label: 'Food at Devra' }) + '</div></div></div></section>';
   const exps = CUR.experiences || [];
-  const grid = exps.length ? '<section class="band band--soft"><div class="wrap"><div class="sec-head" data-reveal><div><p class="eyebrow">At Devra</p><h2>Ways to spend your <em class="ital">days</em></h2></div></div><div class="exp-grid stagger">' + exps.map(expCard).join('') + '</div></div></section>' : '';
-  return pageHeroFor('experiences', 'Experiences') + feature('exp_intro', { collage: true }) + grid + feature('exp_culinary', { flip: true }) + marquee() + feature('exp_community', { soft: true, more: [LINKS.udaipur, 'Explore Udaipur'] }) + bookBand();
+  const cards = exps.length ? '<section class="band band--soft"><div class="wrap">' + shead('Personalised experiences', 'Ways to spend your days', x.title) + '<div class="tcards stagger">' +
+    exps.map((e, i) => '<article class="tcard"><span class="tnum">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(e.title) + '</h3><p>' + esc(e.text) + '</p></article>').join('') + '</div></div></section>' : '';
+  const t = sec('stay_perfect');
+  const tailor = t ? '<section class="band tailor"><div class="wrap" data-reveal><p class="eyebrow">Tailor-made stays</p><h2>' + at(t.title) + '</h2>' + ornament() + '<div class="prose">' + paras(t.body) + '</div>' +
+    (t.items && t.items.length ? '<ul class="chips">' + t.items.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' : '') + '<div class="btn-row"><a class="btn btn--primary" href="' + LINKS.contact + '">Plan your stay <span class="arrow">→</span></a></div></div></section>' : '';
+  const l = sec('home_f2'), reach = (s.reach || []).filter(r => r.label || r.value), maps = safeUrl(s.mapsUrl);
+  const loc = l ? '<section class="band band--soft"><div class="wrap loc"><div class="loc-head" data-reveal="left"><p class="eyebrow">Devra location</p><h2>' + at(l.title) + '</h2>' + ornament('ornament--left') + '</div>' +
+    '<div class="loc-body" data-reveal="right"><div class="prose">' + paras(l.body) + '</div>' + (reach.length ? '<ul class="reach-list">' + reach.map(r => '<li><span>' + esc(r.label) + '</span><strong>' + esc(r.value) + '</strong></li>').join('') + '</ul>' : '') +
+    '<div class="btn-row">' + (maps ? '<a class="btn btn--ghost" href="' + esc(maps) + '" target="_blank" rel="noopener">Open in Google Maps <span class="arrow">↗</span></a>' : '') + '</div></div></div></section>' : '';
+  const pl = (CUR.places || []).filter(p => hasPhoto(p.photo)).slice(0, 4);
+  const up = sec('udaipur_places');
+  const rows = pl.length ? '<section class="band"><div class="wrap">' + shead('Around Devra', 'Outings into the City of Lakes', up ? firstSentence(up.body) : '') + '<div class="srows">' +
+    pl.map((p, i) => '<article class="srow' + (i % 2 ? ' srow--flip' : '') + '"><div class="srow-media" data-reveal="' + (i % 2 ? 'right' : 'left') + '">' + pic(p.photo, { label: p.name }) + '</div><div class="srow-copy" data-reveal="' + (i % 2 ? 'left' : 'right') + '"><p class="eyebrow">' + esc(p.distance || 'Udaipur') + '</p><h3>' + esc(p.name) + '</h3><p>' + esc(p.text) + '</p></div></article>').join('') +
+    '</div><div class="center-row"><a class="btn btn--ghost" href="' + LINKS.udaipur + '">All places to visit <span class="arrow">→</span></a></div></div></section>' : '';
+  const ed = ['exp_culinary', 'exp_community'].filter(k => sec(k));
+  const edit = ed.length ? '<section class="band band--soft"><div class="wrap erows">' + ed.map((k, i) => {
+    const e = sec(k);
+    return '<article class="erow' + (i % 2 ? ' erow--flip' : '') + '" id="' + k + '"><div class="erow-media" data-reveal="' + (i % 2 ? 'right' : 'left') + '">' + pic(e.photo, { label: e.title }) + '</div><div class="erow-copy" data-reveal="' + (i % 2 ? 'left' : 'right') + '">' +
+      (e.eyebrow ? '<p class="eyebrow">' + esc(e.eyebrow) + '</p>' : '') + '<p class="quote">' + esc(e.title) + '</p>' + paras(e.body) + '</div></article>';
+  }).join('') + '</div></section>' : '';
+  return ehero + cards + tailor + loc + rows + marquee() + edit + bookBand();
 }
 function viewUdaipur() {
   const p = CUR.sections.udaipur_places;
