@@ -1195,3 +1195,11 @@ body{font-size:1.0625rem;line-height:1.75}
 .photo-band-copy h2{font-size:clamp(2.2rem, 3.8vw, 3.4rem);text-shadow:0 2px 18px rgb(0 0 0 / .4)}
 .photo-band-copy p{text-shadow:0 1px 10px rgb(0 0 0 / .5)}
 @media (max-width:760px){ .hero .hero-content,.hero--page .hero-content{padding-bottom:92px} .hero--home .hero-content{padding-bottom:96px} }
+
+/* footer login, guest-book illustration */
+.login-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--band-line);border-radius:999px;font-size:.8rem;color:var(--band-muted)!important;text-decoration:none!important;transition:background .2s,color .2s,border-color .2s}
+.login-btn svg{width:14px;height:14px}
+.login-btn:hover{background:rgb(255 255 255 / .08);color:var(--band-ink)!important;border-color:var(--band-muted)}
+.note-art{display:block;width:100%;height:auto;box-shadow:0 1px 3px rgb(0 0 0 / .18)}
+.note--art .note-open{display:block;cursor:default}
+.foot-base{justify-content:flex-start;align-items:center;gap:16px}

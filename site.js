@@ -138,7 +138,8 @@ const ICONS = {
   lake: 'M2 17c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 21c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M7 12a5 5 0 0 1 10 0M12 3.5v2M5.2 6.2l1.4 1.4M18.8 6.2l-1.4 1.4',
   palace: 'M3 21h18M4 21v-9h16v9M8 12V9a4 4 0 0 1 8 0v3M12 5V3M10 21v-3a2 2 0 0 1 4 0v3M4 12a2 2 0 0 1 4 0M16 12a2 2 0 0 1 4 0M6.5 15.5h1M16.5 15.5h1',
   temple: 'M12 2v2M8.5 9 12 4l3.5 5M6 13l6-4 6 4M5 21v-8h14v8M3 21h18M10 21v-4h4v4',
-  fort: 'M3 21h18M4 21V8h2.5v2.5H9V8h2v2.5h2V8h2v2.5h2.5V8H20v13M10 21v-4a2 2 0 0 1 4 0v4'
+  fort: 'M3 21h18M4 21V8h2.5v2.5H9V8h2v2.5h2V8h2v2.5h2.5V8H20v13M10 21v-4a2 2 0 0 1 4 0v4',
+  lock: 'M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5zM12 15v2.5'
 };
 function icon(name) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (ICONS[name] || ICONS.leaf) + '"></path></svg>'; }
 function amenityIcon(t) { t = String(t).toLowerCase(); return /airport|railway|pickup|station/.test(t) ? 'plane' : /pool|swim/.test(t) ? 'pool' : /air-?condition|\bac\b/.test(t) ? 'snow' : /wi-?fi|internet/.test(t) ? 'wifi' : /laundry|wash/.test(t) ? 'laundry' : /taxi|cab|car/.test(t) ? 'car' : 'leaf'; }
@@ -223,7 +224,12 @@ function footer() {
     '<p>' + esc(s.footerAbout) + '</p>' + (socials ? '<ul class="socials">' + socials + '</ul>' : '') + '</div>' +
     '<div><h3>Explore</h3><ul><li><a href="' + LINKS.home + '">Home</a></li>' + NAV.map(([k, l]) => '<li><a href="' + LINKS[k] + '">' + l + '</a></li>').join('') + '<li><a href="' + LINKS.luxury + '">Luxury homestay in Udaipur</a></li></ul></div>' +
     '<div><h3>Contact</h3><address>' + esc(s.address).replace(/\n/g, '<br>') + '</address>' + phones.map(copyRow).join('') + (s.email ? copyRow(s.email) : '') + '</div>' +
-    '</div><div class="wrap foot-base"><span>© ' + new Date().getFullYear() + ' ' + esc(s.siteName || 'Devra Udaipur') + '. All rights reserved.</span>' + (STATE.static ? '' : '<a href="' + adminUrl() + '">Admin</a>') + '</div></footer>';
+    '</div><div class="wrap foot-base"><span>© ' + new Date().getFullYear() + ' ' + esc(s.siteName || 'Devra Udaipur') + '. All rights reserved.</span>' + loginLink() + '</div></footer>';
+}
+function loginLink() {
+  const ext = STATE.static ? safeUrl((CUR.settings || {}).adminUrl) : '';
+  if (STATE.static && !ext) return '';
+  return '<a class="login-btn" href="' + esc(STATE.static ? ext : adminUrl()) + '"' + (STATE.static ? ' target="_blank" rel="noopener"' : '') + ' aria-label="Admin login">' + icon('lock') + '<span>Login</span></a>';
 }
 function copyRow(v) { return '<p class="copy-row"><span class="copy-val">' + esc(v) + '</span><button type="button" class="copy-btn" data-act="copy" data-copy="' + esc(v) + '">Copy</button></p>'; }
 function floatCta() { return PAGE === 'contact' ? '' : '<a class="float-cta" href="' + LINKS.contact + '"><span class="pulse" aria-hidden="true"></span>Enquire</a>'; }
@@ -375,6 +381,35 @@ function mosaicBand() {
   return '<section class="band band--soft"><div class="wrap"><div class="sec-head" data-reveal><div><p class="eyebrow">Gallery</p><h2>A look around <em class="ital">Devra</em></h2></div><a class="text-link" href="' + LINKS.gallery + '">See all photos <span class="arrow">→</span></a></div>' +
     '<div class="mosaic stagger">' + galleryButtons(feat, 'home') + '</div></div></section>';
 }
+/* Until guest notes are added (Admin → Reviews), the frames hold an illustrated guest-book page: no invented words */
+function inkLines(seed, rows, top, gap, left, right) {
+  let rnd = seed * 9301 + 49297; const R = () => { rnd = (rnd * 9301 + 49297) % 233280; return rnd / 233280; };
+  let out = '';
+  for (let r = 0; r < rows; r++) {
+    const y = top + r * gap, end = right - (r === rows - 1 ? 60 + R() * 60 : R() * 30);
+    let x = left + (r === 0 ? 0 : R() * 8), d = 'M' + x.toFixed(1) + ' ' + y;
+    while (x < end) {
+      const w = 5 + R() * 7, h = 5 + R() * 8;
+      d += ' c' + (w * .3).toFixed(1) + ' ' + (-h).toFixed(1) + ' ' + (w * .8).toFixed(1) + ' ' + (-h).toFixed(1) + ' ' + w.toFixed(1) + ' 0';
+      if (R() > .82) { x += w + 7; d += ' m7 0'; } else x += w;
+    }
+    out += '<path d="' + d + '"/>';
+  }
+  return out;
+}
+function noteArt(i) {
+  const lines = inkLines(i + 3, i === 1 ? 9 : 6, 46, 22, 26, 254);
+  const h = i === 1 ? 300 : 230;
+  return '<svg class="note-art" viewBox="0 0 280 ' + h + '" role="img" aria-label="Illustration of a page from the Devra guest book"><rect width="280" height="' + h + '" fill="#FFFDF6"/>' +
+    '<g stroke="rgb(120 129 106 / .22)">' + Array.from({ length: Math.floor((h - 40) / 22) }, (_, k) => '<path d="M14 ' + (49 + k * 22) + 'H266"/>').join('') + '</g><path d="M22 0V' + h + '" stroke="rgb(185 71 54 / .3)"/>' +
+    '<g fill="none" stroke="#24407E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85">' + lines + '</g>' +
+    '<g transform="translate(' + (i === 2 ? 200 : 210) + ' ' + (h - 34) + ')" fill="none" stroke="#B94736" stroke-width="1.6"><path d="M0 0c4-8 10-8 12 0 2-8 8-8 12 0-6 8-12 12-12 12S-6 8 0 0z"/></g></svg>';
+}
+function guestbookEmpty(ta) {
+  return '<section class="band guestbook" id="guestbook"><div class="wrap">' + shead('Testimonials', 'Notes from our guest book', 'Written by hand by guests before they left Devra.') +
+    '<div class="notes stagger">' + [0, 1, 2].map(i => '<figure class="note note--scan note--art" style="--tilt:' + [-2.2, 1.6, -1.1][i] + 'deg"><span class="tape" aria-hidden="true"></span><span class="note-open">' + noteArt(i) + '</span><figcaption class="note-who"><span class="hand">Guest book</span><small>Devra Udaipur</small></figcaption></figure>').join('') + '</div>' +
+    (ta ? '<div class="center-row"><a class="btn btn--ghost" href="' + esc(ta) + '" target="_blank" rel="noopener">Read guest reviews on TripAdvisor <span class="arrow">→</span></a></div>' : '') + '</div></section>';
+}
 const NOTE_TILT = [-2.2, 1.6, -1.1, 2.3, -1.7, 1.2, -2.6, 0.9];
 function noteCard(x, i, scanIndex) {
   const tilt = ' style="--tilt:' + NOTE_TILT[i % NOTE_TILT.length] + 'deg"';
@@ -389,11 +424,7 @@ function noteCard(x, i, scanIndex) {
 function reviewsBand() {
   const r = (CUR.reviews || []).filter(x => x && (x.quote || hasPhoto(x.photo)));
   const ta = safeUrl((CUR.settings.socials || {}).tripadvisor);
-  if (!r.length) {
-    if (!ta) return '';
-    return '<section class="band band--tight"><div class="wrap cta-row" data-reveal><div><p class="eyebrow">Guest reviews</p><h2>Read what guests say about <em class="ital">Devra</em></h2><p class="muted">Reviews from travellers who have stayed with us are on TripAdvisor.</p></div>' +
-      '<a class="btn btn--ghost" href="' + esc(ta) + '" target="_blank" rel="noopener">Read reviews on TripAdvisor <span class="arrow">→</span></a></div></section>';
-  }
+  if (!r.length) return guestbookEmpty(ta);
   const scans = r.filter(x => hasPhoto(x.photo));
   LB_SETS.notes = scans.map(x => x.photo);
   return '<section class="band guestbook" id="guestbook"><div class="wrap">' + shead('Testimonials', 'Notes from our guest book', 'Written by hand by guests before they left Devra.') +
@@ -1317,7 +1348,7 @@ function tabSettings() {
     '<section class="panel form"><h2 class="panel-title">How to reach</h2><p class="hint">Drawn as an animated route on the home, About and Contact pages.</p>' + inlineList('settings/reach') + '</section>' +
     '<section class="panel form"><h2 class="panel-title">Booking banner</h2>' + fld('Title', b + '/ctaTitle', s.ctaTitle) + fld('Text', b + '/ctaText', s.ctaText, { type: 'textarea', rows: 2 }) + '</section>' +
     '<section class="panel form"><h2 class="panel-title">Social links</h2><div class="form-2">' + Object.keys(SOCIAL_NAMES).map(k => fld(SOCIAL_NAMES[k], b + '/socials/' + k, (s.socials || {})[k], { type: 'url' })).join('') + '</div></section>' +
-    '<section class="panel form"><h2 class="panel-title">Footer & search engines</h2>' + fld('Site name', b + '/siteName', s.siteName) + fld('Footer text', b + '/footerAbout', s.footerAbout, { type: 'textarea', rows: 3 }) + fld('Meta title', b + '/seoTitle', s.seoTitle) + fld('Meta description', b + '/seoDescription', s.seoDescription, { type: 'textarea', rows: 3, hint: 'Used by search engines once the site is live on your domain.' }) + '</section>';
+    '<section class="panel form"><h2 class="panel-title">Footer & search engines</h2>' + fld('Site name', b + '/siteName', s.siteName) + fld('Footer text', b + '/footerAbout', s.footerAbout, { type: 'textarea', rows: 3 }) + fld('Meta title', b + '/seoTitle', s.seoTitle) + fld('Meta description', b + '/seoDescription', s.seoDescription, { type: 'textarea', rows: 3, hint: 'Used by search engines once the site is live on your domain.' }) + fld('Website address', b + '/siteUrl', s.siteUrl, { type: 'url', hint: 'Your live domain, e.g. https://devraudaipur.in/. Used for Google (canonical links and the sitemap).' }) + fld('Admin login link', b + '/adminUrl', s.adminUrl, { type: 'url', hint: 'Where the small Login button in the footer of the hosted copy points.' }) + '</section>';
 }
 
 /* ---------- Photo picker ---------- */
