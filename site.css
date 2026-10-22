@@ -1203,3 +1203,51 @@ body{font-size:1.0625rem;line-height:1.75}
 .note-art{display:block;width:100%;height:auto;box-shadow:0 1px 3px rgb(0 0 0 / .18)}
 .note--art .note-open{display:block;cursor:default}
 .foot-base{justify-content:flex-start;align-items:center;gap:16px}
+
+/* ===== v12: client notes. Times New Roman everywhere, calm Padmaa-style colour use (one soft tint of the logo colours per band, one heading colour, few accents), assistance icons, framed guest reviews ===== */
+:root{
+  --display:"Times New Roman", Tinos, Times, "Liberation Serif", serif;
+  --body:"Times New Roman", Tinos, Times, "Liberation Serif", serif;
+  --step-0:1.12rem;
+}
+body{font-size:var(--step-0);line-height:1.62;letter-spacing:0}
+h1,h2,h3{font-weight:400;letter-spacing:-.004em}
+/* headings in one colour, like the reference: no coloured last word */
+.ital,.hero .ital,.band--ink .ital,.photo-band .ital,.book-band .ital{color:inherit}
+/* Times New Roman has only regular and bold: keep public UI regular so it reads light and classic */
+.site-nav a,.btn,.text-link,.meta,.chips li,.chip-btn,.g-cap,.fact-l,.tall .more,.copy-val,.copy-btn,.menu-btn,.site-foot h3,.contact-list h3,.field > label,.ph-label{font-weight:400}
+.site-nav a{font-size:1.02rem;letter-spacing:.02em}
+.btn{font-size:1.02rem;letter-spacing:.03em}
+.eyebrow{font-weight:400;font-size:.84rem;letter-spacing:.2em}
+.brand-place,.badge-spin text{font-weight:400}
+.fact-num{font-family:var(--display);font-weight:400;letter-spacing:-.01em}
+.fact-unit{color:var(--terra)}
+.prose p,.nrow-copy p,.suite-body p{max-width:58ch}
+.lead{font-size:1.18rem}
+.marquee span{font-style:italic}
+
+/* "On request" row under the amenities, and the Assistance band */
+.amen-sub{display:flex;align-items:center;justify-content:center;gap:12px;margin:34px 0 14px;font-size:.84rem;letter-spacing:.2em;text-transform:uppercase;color:var(--terra)}
+.amen-sub::before,.amen-sub::after{content:"";width:28px;height:1px;background:var(--sage)}
+.amen--assist li{justify-content:flex-start}
+.amen--assist .ico{background:var(--terra-soft);color:var(--terra)}
+.band--soft .amen li,.band--soft .info-list li{background:var(--bg)}
+
+/* Good to know: check-in, check-out, beds, inclusions */
+.info-list{list-style:none;padding:0;margin:0 auto;max-width:1080px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.info-list li{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:22px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);line-height:1.38}
+.info-list strong{display:block;font-weight:400;font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--terra);margin-bottom:4px}
+@media (max-width:900px){ .info-list{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:520px){ .info-list{grid-template-columns:1fr} .info-list li{flex-direction:row;text-align:left;align-items:center} }
+.band--tight .shead{margin-bottom:26px}
+
+/* Guest reviews inside the wooden frames: the review title in handwriting on lined paper */
+.note--quote .note-open{cursor:default}
+.note-paper{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;min-height:250px;padding:26px 22px 22px 40px;text-align:left;
+  background-color:#FFFDF6;background-image:linear-gradient(90deg, transparent 26px, rgb(185 71 54 / .3) 26px 27px, transparent 27px), repeating-linear-gradient(180deg, transparent 0 33px, rgb(120 129 106 / .2) 33px 34px);background-position:0 0, 0 12px;box-shadow:0 1px 3px rgb(0 0 0 / .18)}
+.note-paper blockquote.hand{margin:0;font-family:var(--hand);font-size:clamp(1.75rem, 2.3vw, 2.15rem);line-height:1.15;font-weight:500;color:var(--pen)}
+.note-stars{color:#C2902F;letter-spacing:.14em;font-size:1.05rem;line-height:1}
+.note-src{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#6B6E63}
+.guestbook .btn-row{justify-content:center}
+.hero h1 .w.accent > span,.ehero h1 .w.accent > span,.hero h1 .accent{color:inherit}
+@media (max-width:520px){ .amen--assist{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px} .amen--assist li{padding:12px;gap:10px;font-size:1rem} .amen--assist .ico{width:38px;height:38px} .amen--assist .ico svg{width:19px;height:19px} }

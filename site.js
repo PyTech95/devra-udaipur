@@ -5,7 +5,7 @@
 const APP = document.getElementById('app');
 const PAGE = (APP && APP.dataset.page) || 'home';
 const IS_INDEX = PAGE === 'home';
-const FONT_URL = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rozha+One&display=swap';
+const FONT_URL = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Rozha+One&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap';
 const RESET = captureReset();
 const RM = (() => { try { return window.matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) { return { matches: false }; } })();
 const LINKS = { luxury: 'luxury-homestay-udaipur.html', home: './', about: 'about.html', stay: 'the-stay.html', experiences: 'experiences.html', udaipur: 'explore-udaipur.html', gallery: 'gallery.html', journal: 'journal.html', contact: 'contact.html' };
@@ -70,9 +70,9 @@ let lb = null, picker = null;
 const TABS = [['overview', 'Overview'], ['journal', 'Blog'], ['stories', 'Stories'], ['photos', 'Photos'], ['faqs', 'FAQ'], ['pages', 'Page text'], ['experiences', 'Experiences'], ['places', 'Places'], ['reviews', 'Reviews'], ['settings', 'Site settings']];
 const SOCIAL_NAMES = { facebook: 'Facebook', instagram: 'Instagram', tripadvisor: 'TripAdvisor', youtube: 'YouTube' };
 const PAGE_GROUPS = [
-  ['Home page', null, ['home_about', 'home_f1', 'home_f2', 'home_f3', 'home_f4', 'home_aerial', 'home_room', 'home_stay', 'home_cuisine', 'home_band']],
+  ['Home page', null, ['home_about', 'home_f1', 'home_f2', 'home_f3', 'home_f4', 'home_aerial', 'home_room', 'home_stay', 'home_cuisine', 'home_reviews', 'home_band']],
   ['About', 'about', ['about_devra', 'about_hosts']],
-  ['The stay', 'stay', ['stay_leisure', 'stay_rooms', 'stay_band', 'stay_facilities', 'stay_perfect']],
+  ['The stay', 'stay', ['stay_leisure', 'stay_rooms', 'stay_info', 'stay_band', 'stay_facilities', 'stay_assist', 'stay_perfect']],
   ['Experiences', 'experiences', ['exp_intro', 'exp_culinary', 'exp_community']],
   ['Explore Udaipur', 'udaipur', ['udaipur_about', 'udaipur_places', 'udaipur_mustdo']],
   ['Gallery', 'gallery', []],
@@ -85,7 +85,7 @@ const LISTS = {
   stories: { label: 'Story', fields: [['title', 'Title (shown under the circle)', 'text'], ['cover', 'Cover photo (shown in the circle)', 'photo'], ['category', 'Play photos from this category (as named in the Photos tab, e.g. Rooms, Cuisine, Estate, Pool, Lounges)', 'text'], ['caption', 'Text on the first slide (optional)', 'textarea']] },
   experiences: { label: 'Experience', fields: [['title', 'Title', 'text'], ['text', 'Description', 'textarea'], ['photo', 'Photo', 'photo']] },
   places: { label: 'Place', fields: [['name', 'Name', 'text'], ['distance', 'Distance from Udaipur (optional)', 'text'], ['text', 'Description', 'textarea'], ['photo', 'Photo', 'photo']] },
-  reviews: { label: 'Review', fields: [['name', 'Guest name', 'text'], ['from', 'From (city or country)', 'text'], ['quote', 'Review text (typed out; shown in handwriting when there is no photo of the note)', 'textarea'], ['photo', 'Photo of the handwritten note (optional, crop it to the note)', 'photo'], ['source', 'Source, e.g. Guest book or TripAdvisor', 'text'], ['date', 'Month and year', 'text']] },
+  reviews: { label: 'Review', fields: [['name', 'Guest name', 'text'], ['from', 'From (city or country)', 'text'], ['quote', 'Review text (typed out; shown in handwriting when there is no photo of the note)', 'textarea'], ['photo', 'Photo of the handwritten note (optional, crop it to the note)', 'photo'], ['source', 'Source, e.g. Guest book or TripAdvisor', 'text'], ['date', 'Month and year', 'text'], ['rating', 'Stars out of 5 (optional, for online reviews)', 'text']] },
   'settings/facts': { label: 'Fact', fields: [['value', 'Value', 'text'], ['label', 'Label', 'text']] },
   'settings/reach': { label: 'Distance', fields: [['label', 'Place', 'text'], ['value', 'Distance', 'text']] },
   'settings/heroSlides': { label: 'Slide', fields: [['photo', 'Photo', 'photo'], ['caption', 'Caption (optional)', 'text']] }
@@ -139,10 +139,23 @@ const ICONS = {
   palace: 'M3 21h18M4 21v-9h16v9M8 12V9a4 4 0 0 1 8 0v3M12 5V3M10 21v-3a2 2 0 0 1 4 0v3M4 12a2 2 0 0 1 4 0M16 12a2 2 0 0 1 4 0M6.5 15.5h1M16.5 15.5h1',
   temple: 'M12 2v2M8.5 9 12 4l3.5 5M6 13l6-4 6 4M5 21v-8h14v8M3 21h18M10 21v-4h4v4',
   fort: 'M3 21h18M4 21V8h2.5v2.5H9V8h2v2.5h2V8h2v2.5h2.5V8H20v13M10 21v-4a2 2 0 0 1 4 0v4',
-  lock: 'M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5zM12 15v2.5'
+  lock: 'M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5zM12 15v2.5',
+  clock: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM12 7.5V12l3 2',
+  bed: 'M3 6.5V19M3 15h18M21 19v-5.5a3 3 0 0 0-3-3h-7.5V15M6.8 12.8a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z',
+  school: 'M2.5 9.5 12 5l9.5 4.5L12 14 2.5 9.5ZM6.5 11.5v4c0 1.4 2.5 3 5.5 3s5.5-1.6 5.5-3v-4M21.5 9.5V15',
+  bath: 'M3.5 12h17v1.5a5.5 5.5 0 0 1-5.5 5.5H9a5.5 5.5 0 0 1-5.5-5.5V12ZM6 12V6.5a2 2 0 0 1 3.8-.8M7.5 19l-1 2M16.5 19l1 2',
+  paw: 'M6.5 7.5a1.6 2.1 0 1 0 3.2 0 1.6 2.1 0 1 0-3.2 0M14.3 7.5a1.6 2.1 0 1 0 3.2 0 1.6 2.1 0 1 0-3.2 0M3 12a1.5 1.9 0 1 0 3 0 1.5 1.9 0 1 0-3 0M18 12a1.5 1.9 0 1 0 3 0 1.5 1.9 0 1 0-3 0M12 12.5c-2.8 0-4.8 3.4-4.8 5.4 0 1.4 1.2 2 2.3 2s1.6-.5 2.5-.5 1.4.5 2.5.5 2.3-.6 2.3-2c0-2-2-5.4-4.8-5.4Z',
+  yoga: 'M10.2 4.8a1.8 1.8 0 1 0 3.6 0 1.8 1.8 0 1 0-3.6 0M12 8.5v5M5.5 10.5 12 12.5l6.5-2M3.5 19.5c3.5 0 5.5-3 8.5-3s5 3 8.5 3M8.5 16.8 6 19.5M15.5 16.8l2.5 2.7',
+  mehendi: 'M8 21v-6.2L5.6 11.6a1.4 1.4 0 0 1 2.3-1.6L9 11.4V5.2a1.3 1.3 0 0 1 2.6 0V10V3.9a1.3 1.3 0 0 1 2.6 0V10V5.2a1.3 1.3 0 0 1 2.6 0V10.5V7.6a1.3 1.3 0 0 1 2.6 0v7.4c0 3.4-2.3 6-5.6 6H8ZM12.9 14.2a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6ZM12.9 12.2v.5M14.9 15.5h.5M10.9 15.5h.5',
+  taxi: 'M10 3.5h4V5h-4zM5 11l1.6-4.2A2 2 0 0 1 8.5 5.5h7a2 2 0 0 1 1.9 1.3L19 11M3 17v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4H3ZM6 17v2.5M18 17v2.5M7 14h.01M17 14h.01',
+  auto: 'M3 16.5V12c0-3.6 2.6-6.5 6.5-6.5H15l3.5 5.5H21v5.5h-2.2M9.6 16.5h5.2M3 16.5h1.4M9.5 5.5V11h9M4.5 17a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M14.8 17a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0',
+  bakery: 'M5 13h14l-1.6 7.5H6.6L5 13ZM4.5 13a7.5 5.5 0 0 1 15 0M9 13l.6 7.5M15 13l-.6 7.5M12 4.5v3M10.5 6h3'
 };
 function icon(name) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (ICONS[name] || ICONS.leaf) + '"></path></svg>'; }
-function amenityIcon(t) { t = String(t).toLowerCase(); return /airport|railway|pickup|station/.test(t) ? 'plane' : /pool|swim/.test(t) ? 'pool' : /air-?condition|\bac\b/.test(t) ? 'snow' : /wi-?fi|internet/.test(t) ? 'wifi' : /laundry|wash/.test(t) ? 'laundry' : /taxi|cab|car/.test(t) ? 'car' : 'leaf'; }
+function amenityIcon(t) { t = String(t).toLowerCase(); return /airport|railway|pickup|station/.test(t) ? 'plane' : /pool|swim/.test(t) ? 'pool' : /bath|toilet/.test(t) ? 'bath' : /\bpet/.test(t) ? 'paw' : /air-?condition|\bac\b/.test(t) ? 'snow' : /wi-?fi|internet/.test(t) ? 'wifi' : /laundry|wash/.test(t) ? 'laundry' : /taxi|cab|car/.test(t) ? 'car' : 'leaf'; }
+function assistIcon(t) { t = String(t).toLowerCase(); return /yoga|meditat/.test(t) ? 'yoga' : /mehe?ndi|henna/.test(t) ? 'mehendi' : /\bauto|tuk/.test(t) ? 'auto' : /taxi|cab|car/.test(t) ? 'taxi' : /laundry|wash/.test(t) ? 'laundry' : /bak|cake|bread/.test(t) ? 'bakery' : amenityIcon(t); }
+function infoIcon(t) { t = String(t).toLowerCase(); return /check|time|hour/.test(t) ? 'clock' : /\bbed/.test(t) ? 'bed' : /school|village|includ/.test(t) ? 'school' : amenityIcon(t); }
+function iconList(items, fn, cls) { return '<ul class="amen' + (cls ? ' ' + cls : '') + ' stagger">' + items.map(t => '<li><span class="ico">' + icon(fn(t)) + '</span><span>' + esc(t) + '</span></li>').join('') + '</ul>'; }
 function placeIcon(t) { t = String(t).toLowerCase(); return /fort|kumbhal|sanctuary/.test(t) ? 'fort' : /temple|eklingji|jagdish/.test(t) ? 'temple' : /palace|haveli|museum/.test(t) ? 'palace' : /lake|sagar|pichola/.test(t) ? 'lake' : 'leaf'; }
 function ornament(cls) {
   return '<span class="ornament' + (cls ? ' ' + cls : '') + '" aria-hidden="true"><svg viewBox="0 0 132 26"><path class="o-line" d="M0 15H46M86 15H132"></path>' +
@@ -405,10 +418,16 @@ function noteArt(i) {
     '<g fill="none" stroke="#24407E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85">' + lines + '</g>' +
     '<g transform="translate(' + (i === 2 ? 200 : 210) + ' ' + (h - 34) + ')" fill="none" stroke="#B94736" stroke-width="1.6"><path d="M0 0c4-8 10-8 12 0 2-8 8-8 12 0-6 8-12 12-12 12S-6 8 0 0z"/></g></svg>';
 }
+function reviewsHead() { const h = sec('home_reviews') || {}; return shead(h.eyebrow || 'Guest reviews', h.title || 'What our guests say', h.body || ''); }
+function reviewButtons(ta) {
+  const g = safeUrl(CUR.settings.mapsUrl);
+  return (ta || g) ? '<div class="center-row btn-row">' + (ta ? '<a class="btn btn--ghost" href="' + esc(ta) + '" target="_blank" rel="noopener">Read all reviews on TripAdvisor <span class="arrow">↗</span></a>' : '') +
+    (g ? '<a class="btn btn--quiet" href="' + esc(g) + '" target="_blank" rel="noopener">Google reviews <span class="arrow">↗</span></a>' : '') + '</div>' : '';
+}
 function guestbookEmpty(ta) {
-  return '<section class="band guestbook" id="guestbook"><div class="wrap">' + shead('Testimonials', 'Notes from our guest book', 'Written by hand by guests before they left Devra.') +
+  return '<section class="band guestbook" id="guestbook"><div class="wrap">' + reviewsHead() +
     '<div class="notes stagger">' + [0, 1, 2].map(i => '<figure class="note note--scan note--art" style="--tilt:' + [-2.2, 1.6, -1.1][i] + 'deg"><span class="tape" aria-hidden="true"></span><span class="note-open">' + noteArt(i) + '</span><figcaption class="note-who"><span class="hand">Guest book</span><small>Devra Udaipur</small></figcaption></figure>').join('') + '</div>' +
-    (ta ? '<div class="center-row"><a class="btn btn--ghost" href="' + esc(ta) + '" target="_blank" rel="noopener">Read guest reviews on TripAdvisor <span class="arrow">→</span></a></div>' : '') + '</div></section>';
+    reviewButtons(ta) + '</div></section>';
 }
 const NOTE_TILT = [-2.2, 1.6, -1.1, 2.3, -1.7, 1.2, -2.6, 0.9];
 function noteCard(x, i, scanIndex) {
@@ -419,7 +438,12 @@ function noteCard(x, i, scanIndex) {
     return '<figure class="note note--scan"' + tilt + '><span class="tape" aria-hidden="true"></span><button type="button" class="note-open" data-act="lightbox" data-set="notes" data-i="' + scanIndex + '" aria-label="Read the handwritten note from ' + esc(x.name || 'a guest') + '">' +
       pic(x.photo, { natural: true, label: 'Handwritten note from ' + (x.name || 'a guest') }) + '</button>' + (x.quote ? '<blockquote class="sr">' + esc(x.quote) + '</blockquote>' : '') + who + '</figure>';
   }
-  return '<figure class="note"' + tilt + '><span class="tape" aria-hidden="true"></span><blockquote class="hand">' + esc(x.quote).replace(/\n/g, '<br>') + '</blockquote>' + who + '</figure>';
+  const n = Math.max(0, Math.min(5, parseInt(x.rating, 10) || 0));
+  const stars = n ? '<span class="note-stars" role="img" aria-label="' + n + ' out of 5">' + '★'.repeat(n) + '</span>' : '';
+  const src = [x.source, x.date].filter(Boolean).join(' · ');
+  const whoQ = '<figcaption class="note-who"><span class="hand">' + esc(x.name || 'A guest') + '</span>' + (x.from ? '<small>' + esc(x.from) + '</small>' : '') + '</figcaption>';
+  return '<figure class="note note--scan note--quote"' + tilt + '><span class="tape" aria-hidden="true"></span><span class="note-open"><span class="note-paper">' + stars +
+    '<blockquote class="hand">“' + esc(x.quote).replace(/\n/g, '<br>') + '”</blockquote>' + (src ? '<span class="note-src">' + esc(src) + '</span>' : '') + '</span></span>' + whoQ + '</figure>';
 }
 function reviewsBand() {
   const r = (CUR.reviews || []).filter(x => x && (x.quote || hasPhoto(x.photo)));
@@ -427,14 +451,13 @@ function reviewsBand() {
   if (!r.length) return guestbookEmpty(ta);
   const scans = r.filter(x => hasPhoto(x.photo));
   LB_SETS.notes = scans.map(x => x.photo);
-  return '<section class="band guestbook" id="guestbook"><div class="wrap">' + shead('Testimonials', 'Notes from our guest book', 'Written by hand by guests before they left Devra.') +
-    '<div class="notes stagger">' + r.map((x, i) => noteCard(x, i, scans.indexOf(x))).join('') + '</div>' +
-    (ta ? '<div class="center-row"><a class="btn btn--ghost" href="' + esc(ta) + '" target="_blank" rel="noopener">More reviews on TripAdvisor <span class="arrow">→</span></a></div>' : '') + '</div></section>';
+  return '<section class="band guestbook" id="guestbook"><div class="wrap">' + reviewsHead() +
+    '<div class="notes stagger">' + r.map((x, i) => noteCard(x, i, scans.indexOf(x))).join('') + '</div>' + reviewButtons(ta) + '</div></section>';
 }
 function journalBand() {
   const posts = publishedPosts().slice(0, 3);
   if (!posts.length) return '';
-  return '<section class="band blog-band"><div class="wrap">' + shead('Blog', 'Stories from the hillock', 'News, recipes and travel notes from Devra, written by the family.') + '<div class="posts stagger">' + posts.map(postCard).join('') + '</div>' +
+  return '<section class="band blog-band"><div class="wrap">' + shead('Blog', 'Stories from the hillock', '') + '<div class="posts stagger">' + posts.map(postCard).join('') + '</div>' +
     '<div class="center-row"><a class="btn btn--ghost" href="' + LINKS.journal + '">Read the blog <span class="arrow">→</span></a></div></div></section>';
 }
 function instaBand() {
@@ -449,7 +472,7 @@ function instaBand() {
 function roomsGallery() {
   const rooms = (CUR.media || []).filter(m => (m.assetId || m.file) && String(m.category || '').toLowerCase() === 'rooms' && m.showInGallery !== false).slice(0, 9);
   if (rooms.length < 3) return '';
-  return '<section class="band band--soft" id="inside-rooms"><div class="wrap">' + shead('Inside the rooms', 'Eight rooms, each with its own character', 'King-size or twin beds, block-printed linen, handpicked art and big windows onto the green.') +
+  return '<section class="band band--soft" id="inside-rooms"><div class="wrap">' + shead('Inside the rooms', 'Eight rooms, each with its own character', '6 double and 2 twin rooms, some with a bay-window day bed.') +
     '<div class="room-mosaic stagger">' + galleryButtons(rooms, 'rooms') + '</div><div class="center-row"><a class="btn btn--ghost" href="' + LINKS.gallery + '">See all photos <span class="arrow">→</span></a></div></div></section>';
 }
 function routeSvg(stops, vertical) {
@@ -498,9 +521,6 @@ function bookBand() {
   return '<section class="band band--ink book-band"><span class="sun-glow" aria-hidden="true"></span><div class="wrap" data-reveal><p class="eyebrow">Book your stay</p><h2>' + at(s.ctaTitle || 'Your room on the hillock is waiting') + '</h2>' +
     (s.ctaText ? '<p>' + esc(s.ctaText) + '</p>' : '') + '<div class="btn-row">' + (book ? '<a class="btn btn--haldi" href="' + esc(book) + '" target="_blank" rel="noopener">Make a reservation <span class="arrow">→</span></a>' : '') +
     '<a class="btn btn--light" href="' + LINKS.contact + '">Send an enquiry</a></div></div></section>';
-}
-function quoteBand() {
-  return '<section class="band band--ink quote-band"><div class="wrap" data-reveal><blockquote><span class="deva" lang="hi">अतिथि देवो भव</span>Guests are gods.</blockquote><cite>Atithi Devo Bhava, the core value of Indian hospitality that Devra lives by</cite></div></section>';
 }
 function emptyState(title, text, action) { return '<div class="empty"><h3>' + esc(title) + '</h3><p class="muted">' + esc(text) + '</p>' + (action || '') + '</div>'; }
 
@@ -566,7 +586,7 @@ function amenitiesBand() {
   const items = (x.items || []).filter(Boolean);
   const feat = galleryItems(CUR).filter(m => m.featured).sort((a, b) => (a.rank || 99) - (b.rank || 99)).slice(0, 4);
   return '<section class="band"><div class="wrap">' + shead(x.eyebrow || 'Amenities', x.title, firstSentence(x.body)) +
-    (items.length ? '<ul class="amen stagger">' + items.map(t => '<li><span class="ico">' + icon(amenityIcon(t)) + '</span><span>' + esc(t) + '</span></li>').join('') + '</ul>' : '') +
+    (items.length ? iconList(items, amenityIcon) : '') + (function () { const a = sec('stay_assist'), ai = ((a && a.items) || []).filter(Boolean); return ai.length ? '<p class="amen-sub">' + esc(a.eyebrow || 'On request') + '</p>' + iconList(ai, assistIcon, 'amen--assist') : ''; })() +
     '<div class="amen-foot"><a class="text-link" href="' + LINKS.stay + '#stay_facilities">Learn more <span class="arrow">→</span></a></div>' +
     (feat.length ? '<div class="strip stagger">' + galleryButtons(feat, 'home') + '</div>' : '') + '</div></section>';
 }
@@ -580,22 +600,36 @@ function gemsBand() {
     pick.map(p => '<a class="gem" href="' + LINKS.udaipur + '"><span class="ico">' + icon(placeIcon(p.name)) + '</span><h3>' + esc(p.name) + '</h3>' + (p.distance ? '<span class="dist">' + esc(p.distance) + '</span>' : '') + '<p>' + esc(p.text) + '</p></a>').join('') +
     '</div><div class="center-row"><a class="btn btn--ghost" href="' + LINKS.udaipur + '">Explore Udaipur <span class="arrow">→</span></a></div></div></section>';
 }
+function infoBand(o) {
+  const x = sec('stay_info');
+  const items = ((x && x.items) || []).filter(Boolean);
+  if (!items.length) return '';
+  return '<section class="band band--tight info-band' + (o && o.soft ? ' band--soft' : '') + '" id="stay_info"><div class="wrap">' + shead(x.eyebrow, x.title, x.body) + '<ul class="info-list stagger">' +
+    items.map(t => { const k = t.indexOf(': '); return '<li><span class="ico">' + icon(infoIcon(t)) + '</span><span>' + (k > 0 ? '<strong>' + esc(t.slice(0, k)) + '</strong>' + esc(t.slice(k + 2)) : esc(t)) + '</span></li>'; }).join('') + '</ul></div></section>';
+}
+function assistBand(o) {
+  const x = sec('stay_assist');
+  const items = ((x && x.items) || []).filter(Boolean);
+  if (!items.length) return '';
+  return '<section class="band' + (o && o.soft ? ' band--soft' : '') + '" id="stay_assist"><div class="wrap">' + shead(x.eyebrow, x.title, x.body) + iconList(items, assistIcon, 'amen--assist') + '</div></section>';
+}
 function viewHome() {
   return homeHero() + storiesStrip() + welcomeBand() + numberedRows() + photoBand('home_aerial', { full: true, more: [LINKS.gallery, 'See the gallery'] }) + spacesGrid() + diningSplit() + amenitiesBand() + marquee() + gemsBand() + reviewsBand() + journalBand() + instaBand() + bookBand();
 }
-function viewAbout() { return pageHeroFor('about', 'About Devra') + feature('about_devra', { collage: true, badge: 'Atithi Devo Bhava · Guests are gods · ', watermark: 'देवरा' }) + quoteBand() + feature('about_hosts', { flip: true, soft: true }) + routeBand() + bookBand(); }
+function viewAbout() { return pageHeroFor('about', 'About Devra') + feature('about_devra', { collage: true, chips: true, badge: 'Devra Udaipur · A temple where God resides · ', watermark: 'देवरा' }) + feature('about_hosts', { flip: true, soft: true }) + routeBand() + bookBand(); }
 function viewStay() {
   const book = safeUrl(CUR.settings.bookingUrl);
   const cta = book ? '<div class="btn-row"><a class="btn btn--primary" href="' + esc(book) + '" target="_blank" rel="noopener">Book a room <span class="arrow">→</span></a></div>' : '';
-  return pageHeroFor('stay', 'The stay') + feature('stay_leisure', { collage: true }) + feature('stay_rooms', { flip: true, soft: true, extra: cta }) + roomsGallery() + photoBand('stay_band', { full: true }) +
-    feature('stay_facilities') + feature('stay_perfect', { flip: true, soft: true, chips: true }) + feature('home_cuisine', { more: [LINKS.experiences, 'More about our food'] }) + bookBand();
+  return pageHeroFor('stay', 'The stay') + feature('stay_rooms', { extra: cta }) + roomsGallery() + infoBand() + feature('stay_leisure', { collage: true, flip: true, soft: true }) + photoBand('stay_band', { full: true }) +
+    feature('stay_facilities') + assistBand({ soft: true }) + feature('stay_perfect', { flip: true, chips: true }) + bookBand();
 }
 /* Experiences, structured like padmaajaipur.com/experiences: title + tagline + intro + photos → personalised list → tailor-made → location → outings → editorial rows */
 function viewExperiences() {
   heroTone = null;
   const s = CUR.settings, pg = (CUR.pages || {}).experiences || {};
   const x = sec('exp_intro') || {};
-  const third = (sec('exp_culinary') || {}).photo;
+  const taken = [x.photo, x.photo2, (sec('exp_culinary') || {}).photo, (sec('exp_community') || {}).photo];
+  const third = (CUR.experiences || []).map(e => e.photo).find(p => hasPhoto(p) && taken.indexOf(p) < 0) || (sec('exp_culinary') || {}).photo;
   const ehero = '<section class="ehero"><div class="wrap"><p class="eyebrow fade-in">' + esc(s.siteName || 'Devra Udaipur') + '</p><h1 class="rise">' + rise(pg.title || 'Experiences') + '</h1>' +
     (pg.lead ? '<p class="tagline fade-in">' + esc(pg.lead) + '</p>' : '') + ornament() + '<div class="prose fade-in">' + paras(firstPara(x.body)) + '</div>' +
     '<div class="ehero-media"><div class="m-side" data-reveal="left">' + pic(x.photo2, { label: 'Life at Devra' }) + '</div><div class="m-main fade-in">' + pic(x.photo, { eager: true, label: x.title || 'Experiences' }) + '</div><div class="m-side" data-reveal="right">' + pic(third, { label: 'Food at Devra' }) + '</div></div></div></section>';
@@ -698,7 +732,7 @@ function viewContact() {
     '<p class="hint">WhatsApp opens in a new tab with your message filled in. To email instead, copy the message and send it to ' + esc(s.email) + '.</p></form>' +
     '<aside class="panel contact-list" data-reveal="right"><div><h3>Call or WhatsApp</h3>' + phones.map(copyRow).join('') + '</div>' + (s.email ? '<div><h3>Email</h3>' + copyRow(s.email) + '</div>' : '') +
     '<div><h3>Address</h3><address>' + esc(s.address).replace(/\n/g, '<br>') + '</address></div>' + (book ? '<div><h3>Book online</h3><a class="btn btn--ghost btn--sm" href="' + esc(book) + '" target="_blank" rel="noopener">Check availability</a></div>' : '') +
-    '</aside></div></section>' + routeBand();
+    '</aside></div></section>' + infoBand({ soft: true }) + routeBand();
 }
 function waNumber() { return String(CUR.settings.whatsapp || '').replace(/\D/g, ''); }
 function waLink(text) { const n = waNumber(); return n ? 'https://wa.me/' + n + (text ? '?text=' + encodeURIComponent(text) : '') : '#'; }
