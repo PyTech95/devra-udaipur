@@ -8,9 +8,10 @@ const IS_INDEX = PAGE === 'home';
 const FONT_URL = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rozha+One&display=swap';
 const RESET = captureReset();
 const RM = (() => { try { return window.matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) { return { matches: false }; } })();
-const LINKS = { home: './', about: 'about.html', stay: 'the-stay.html', experiences: 'experiences.html', udaipur: 'explore-udaipur.html', gallery: 'gallery.html', journal: 'journal.html', contact: 'contact.html' };
+const LINKS = { luxury: 'luxury-homestay-udaipur.html', home: './', about: 'about.html', stay: 'the-stay.html', experiences: 'experiences.html', udaipur: 'explore-udaipur.html', gallery: 'gallery.html', journal: 'journal.html', contact: 'contact.html' };
 const NAV = [['about', 'About'], ['stay', 'The stay'], ['experiences', 'Experiences'], ['udaipur', 'Explore Udaipur'], ['gallery', 'Gallery'], ['journal', 'Blog'], ['contact', 'Contact']];
-const postUrl = slug => 'post.html#' + slug;
+const postUrl = slug => (typeof STATE !== 'undefined' && STATE && STATE.static ? 'blog-' + slug + '.html' : 'post.html#' + slug);
+const postSlug = () => (APP && APP.dataset.slug) || String(location.hash || '').replace(/^#/, '');
 const adminUrl = () => IS_INDEX ? '#admin' : './#admin';
 
 function captureReset() {
@@ -45,7 +46,7 @@ async function fetchIndexState() {
 function newest(list) { return list.filter(s => s && typeof s === 'object' && s.settings).sort((x, y) => (Number(y.rev) || 0) - (Number(x.rev) || 0))[0] || null; }
 function fixShape(s) {
   ['settings', 'pages', 'sections'].forEach(k => { if (!s[k] || typeof s[k] !== 'object') s[k] = {}; });
-  ['media', 'posts', 'experiences', 'places', 'reviews', 'stories'].forEach(k => { if (!Array.isArray(s[k])) s[k] = []; });
+  ['media', 'posts', 'experiences', 'places', 'reviews', 'stories', 'faqs'].forEach(k => { if (!Array.isArray(s[k])) s[k] = []; });
   const st = s.settings;
   if (!st.socials) st.socials = {};
   ['facts', 'reach', 'phonesOther', 'heroSlides', 'marquee'].forEach(k => { if (!Array.isArray(st[k])) st[k] = []; });
@@ -66,7 +67,7 @@ const admin = { tab: 'overview', postId: null, preview: false, open: new Set(), 
 const LB_SETS = {};
 let lb = null, picker = null;
 
-const TABS = [['overview', 'Overview'], ['journal', 'Blog'], ['stories', 'Stories'], ['photos', 'Photos'], ['pages', 'Page text'], ['experiences', 'Experiences'], ['places', 'Places'], ['reviews', 'Reviews'], ['settings', 'Site settings']];
+const TABS = [['overview', 'Overview'], ['journal', 'Blog'], ['stories', 'Stories'], ['photos', 'Photos'], ['faqs', 'FAQ'], ['pages', 'Page text'], ['experiences', 'Experiences'], ['places', 'Places'], ['reviews', 'Reviews'], ['settings', 'Site settings']];
 const SOCIAL_NAMES = { facebook: 'Facebook', instagram: 'Instagram', tripadvisor: 'TripAdvisor', youtube: 'YouTube' };
 const PAGE_GROUPS = [
   ['Home page', null, ['home_about', 'home_f1', 'home_f2', 'home_f3', 'home_f4', 'home_aerial', 'home_room', 'home_stay', 'home_cuisine', 'home_band']],
@@ -76,9 +77,11 @@ const PAGE_GROUPS = [
   ['Explore Udaipur', 'udaipur', ['udaipur_about', 'udaipur_places', 'udaipur_mustdo']],
   ['Gallery', 'gallery', []],
   ['Journal', 'journal', []],
-  ['Contact', null, ['contact_intro']]
+  ['Contact', null, ['contact_intro']],
+  ['Luxury homestay page (SEO, linked from the footer)', 'luxury', ['seo_luxury']]
 ];
 const LISTS = {
+  faqs: { label: 'Question', fields: [['q', 'Question', 'text'], ['a', 'Answer', 'textarea']] },
   stories: { label: 'Story', fields: [['title', 'Title (shown under the circle)', 'text'], ['cover', 'Cover photo (shown in the circle)', 'photo'], ['category', 'Play photos from this category (as named in the Photos tab, e.g. Rooms, Cuisine, Estate, Pool, Lounges)', 'text'], ['caption', 'Text on the first slide (optional)', 'textarea']] },
   experiences: { label: 'Experience', fields: [['title', 'Title', 'text'], ['text', 'Description', 'textarea'], ['photo', 'Photo', 'photo']] },
   places: { label: 'Place', fields: [['name', 'Name', 'text'], ['distance', 'Distance from Udaipur (optional)', 'text'], ['text', 'Description', 'textarea'], ['photo', 'Photo', 'photo']] },
@@ -218,7 +221,7 @@ function footer() {
   return '<footer class="site-foot"><div class="wrap foot-grid">' +
     '<div>' + (logo && (logo.assetId || logo.file) ? '<span class="logo-plate logo-plate--foot"><img class="foot-logo" src="' + esc(assetSrc(logo)) + '" alt="' + esc(s.siteName) + '" loading="lazy"></span>' : '<p class="foot-brand">' + esc(s.siteName || 'Devra Udaipur') + '</p>') +
     '<p>' + esc(s.footerAbout) + '</p>' + (socials ? '<ul class="socials">' + socials + '</ul>' : '') + '</div>' +
-    '<div><h3>Explore</h3><ul><li><a href="' + LINKS.home + '">Home</a></li>' + NAV.map(([k, l]) => '<li><a href="' + LINKS[k] + '">' + l + '</a></li>').join('') + '</ul></div>' +
+    '<div><h3>Explore</h3><ul><li><a href="' + LINKS.home + '">Home</a></li>' + NAV.map(([k, l]) => '<li><a href="' + LINKS[k] + '">' + l + '</a></li>').join('') + '<li><a href="' + LINKS.luxury + '">Luxury homestay in Udaipur</a></li></ul></div>' +
     '<div><h3>Contact</h3><address>' + esc(s.address).replace(/\n/g, '<br>') + '</address>' + phones.map(copyRow).join('') + (s.email ? copyRow(s.email) : '') + '</div>' +
     '</div><div class="wrap foot-base"><span>© ' + new Date().getFullYear() + ' ' + esc(s.siteName || 'Devra Udaipur') + '. All rights reserved.</span>' + (STATE.static ? '' : '<a href="' + adminUrl() + '">Admin</a>') + '</div></footer>';
 }
@@ -320,7 +323,36 @@ function expRail(title) {
     '<div class="rail-wrap"><div class="rail" id="exp-rail" tabindex="0" aria-label="Experiences">' + exps.map(expCard).join('') + '</div></div>' +
     '<p style="margin-top:22px"><a class="text-link" href="' + LINKS.experiences + '">All experiences <span class="arrow">→</span></a></p></div></section>';
 }
-function placeCard(p) { return '<article class="place card">' + pic(p.photo, { label: p.name, cat: 'Udaipur' }) + '<div class="card-body"><div class="place-title"><h3>' + esc(p.name) + '</h3>' + (p.distance ? '<span class="dist">' + esc(p.distance) + '</span>' : '') + '</div><p>' + esc(p.text) + '</p></div></article>'; }
+/* Illustrated scenes for places that have no photo yet (admin can add a photo any time) */
+function sceneSvg(kind, uid) {
+  const g = 'sg-' + uid;
+  const sky = '<defs><linearGradient id="' + g + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5DCD2"/><stop offset=".62" stop-color="#F8EFE6"/><stop offset="1" stop-color="#F8F5EF"/></linearGradient></defs><rect width="400" height="250" fill="url(#' + g + ')"/>';
+  const sun = '<circle class="sc-sun" cx="300" cy="92" r="30" fill="#E9A18C"/>';
+  const hills = '<path d="M0 150 C60 112 110 120 160 138 C210 156 250 108 300 112 C340 116 370 132 400 126 V190 H0Z" fill="#C9CFBC"/><path d="M0 168 C70 150 130 160 200 166 C270 172 330 150 400 158 V200 H0Z" fill="#AEB79C"/>';
+  const water = '<rect y="176" width="400" height="74" fill="#D9E0D2"/><g class="sc-ripple" stroke="#B4BFA6" stroke-width="2" stroke-linecap="round"><path d="M20 196h50M120 206h70M250 194h60M330 214h40M60 226h80M200 232h60"/></g><g stroke="#E9A18C" stroke-width="3" stroke-linecap="round" opacity=".8"><path d="M282 186h36M288 198h24M294 210h12"/></g>';
+  const palace = (x, y, w) => '<g fill="#F4EFE4" stroke="#45483F" stroke-width="1.6" stroke-linejoin="round"><rect x="' + x + '" y="' + (y - 34) + '" width="' + w + '" height="34"/><rect x="' + (x + w * .3) + '" y="' + (y - 58) + '" width="' + (w * .4) + '" height="24"/>' +
+    '<path d="M' + (x + w * .5 - 14) + ' ' + (y - 58) + ' q14 -26 28 0z"/><path d="M' + (x + 4) + ' ' + (y - 34) + ' q10 -18 20 0z"/><path d="M' + (x + w - 24) + ' ' + (y - 34) + ' q10 -18 20 0z"/></g>' +
+    '<g fill="#45483F" opacity=".75">' + [0, 1, 2, 3, 4].map(i => '<rect x="' + (x + 8 + i * (w - 16) / 5) + '" y="' + (y - 24) + '" width="' + ((w - 16) / 5 - 6) + '" height="14" rx="6"/>').join('') + '</g>';
+  const reflect = (x, y, w) => '<g opacity=".28" transform="translate(0 ' + (2 * y) + ') scale(1 -1)">' + palace(x, y, w) + '</g>';
+  const boat = '<g class="sc-boat"><path d="M150 214 q30 12 60 0 l-6 8 h-48z" fill="#45483F"/><path d="M176 214 v-22 l16 18z" fill="#B94736"/></g>';
+  const temple = (x, base, h) => '<g fill="#F4EFE4" stroke="#45483F" stroke-width="1.6" stroke-linejoin="round"><path d="M' + (x - 30) + ' ' + base + ' v-28 h60 v28z"/><path d="M' + (x - 22) + ' ' + (base - 28) + ' C' + (x - 22) + ' ' + (base - h * .55) + ' ' + (x - 8) + ' ' + (base - h) + ' ' + x + ' ' + (base - h - 6) + ' C' + (x + 8) + ' ' + (base - h) + ' ' + (x + 22) + ' ' + (base - h * .55) + ' ' + (x + 22) + ' ' + (base - 28) + 'z"/><path d="M' + (x - 10) + ' ' + base + ' v-16 q10 -12 20 0 v16" fill="#45483F" opacity=".7"/></g>' +
+    '<path class="sc-flag" d="M' + x + ' ' + (base - h - 6) + ' v-16 l14 5 -14 5" fill="#B94736" stroke="#45483F" stroke-width="1.2"/>';
+  const steps = '<g fill="#E7E1D4" stroke="#45483F" stroke-width="1.2"><rect x="120" y="196" width="160" height="10"/><rect x="104" y="206" width="192" height="10"/><rect x="88" y="216" width="224" height="10"/></g>';
+  const trees = '<g fill="#8A9378"><circle cx="40" cy="176" r="22"/><circle cx="66" cy="184" r="16"/><circle cx="352" cy="178" r="20"/><circle cx="378" cy="186" r="15"/></g>';
+  let body;
+  if (kind === 'lakepalace') body = sun + hills + water + palace(140, 186, 120) + reflect(140, 186, 120) + '<path d="M120 188h160" stroke="#45483F" stroke-width="1.6"/>';
+  else if (kind === 'lake') body = sun + hills + water + palace(10, 176, 130) + boat;
+  else if (kind === 'temple') body = sun + hills + '<rect y="186" width="400" height="64" fill="#EFE9DD"/>' + trees + temple(200, 196, 120) + steps;
+  else if (kind === 'temples') body = sun + hills + '<rect y="186" width="400" height="64" fill="#EFE9DD"/>' + trees + temple(130, 200, 74) + temple(270, 200, 74) + temple(200, 196, 116) + steps;
+  else body = sun + hills + water;
+  return '<svg class="scene" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + sky + body + '</svg>';
+}
+function placeArt(p) {
+  const n = String(p.name || '').toLowerCase();
+  const kind = /lake palace/.test(n) ? 'lakepalace' : /lake|sagar|pichola/.test(n) ? 'lake' : /eklingji/.test(n) ? 'temples' : /temple/.test(n) ? 'temple' : 'land';
+  return '<span class="pic place-art" role="img" aria-label="' + esc('Illustration of ' + p.name) + '">' + sceneSvg(kind, p.id || kind) + '</span>';
+}
+function placeCard(p) { return '<article class="place card">' + (hasPhoto(p.photo) ? pic(p.photo, { label: p.name, cat: 'Udaipur' }) : placeArt(p)) + '<div class="card-body"><div class="place-title"><h3>' + esc(p.name) + '</h3>' + (p.distance ? '<span class="dist">' + esc(p.distance) + '</span>' : '') + '</div><p>' + esc(p.text) + '</p></div></article>'; }
 function postCard(p) {
   return '<article class="post-card card"><a class="post-card-link" href="' + postUrl(esc(p.slug)) + '">' + pic(p.cover, { label: p.title }) +
     '<div class="card-body"><p class="meta">' + esc(p.category) + ' · <time datetime="' + esc(p.date) + '">' + fmtDate(p.date) + '</time></p><h3>' + esc(p.title) + '</h3><p>' + esc(p.excerpt) + '</p><span class="text-link">Read the story <span class="arrow">→</span></span></div></a></article>';
@@ -598,12 +630,26 @@ function postArticle(p) {
 }
 function viewPost() {
   heroTone = null;
-  const slug = String(location.hash || '').replace(/^#/, '');
+  const slug = postSlug();
   const p = (CUR.posts || []).find(x => x.slug === slug && x.status === 'published');
-  if (!p) return '<section class="band post-top"><div class="wrap">' + emptyState('This story is not available', 'It may have been moved or unpublished.', '<a class="btn btn--ghost" href="' + LINKS.journal + '">Go to the journal</a>') + '</div></section>';
+  if (!p) return '<section class="band post-top"><div class="wrap">' + emptyState('This story is not available', 'It may have been moved or unpublished.', '<a class="btn btn--ghost" href="' + LINKS.journal + '">Go to the blog</a>') + '</div></section>';
   const more = publishedPosts().filter(x => x.id !== p.id).slice(0, 3);
   return '<section class="band band--tight post-top"><div class="wrap"><article class="post"><a class="text-link back" href="' + LINKS.journal + '">← All stories</a>' + postArticle(p) + '</article></div></section>' +
-    (more.length ? '<section class="band band--soft"><div class="wrap"><div class="sec-head" data-reveal><div><p class="eyebrow">Journal</p><h2>More <em class="ital">stories</em></h2></div></div><div class="posts stagger">' + more.map(postCard).join('') + '</div></div></section>' : '') + bookBand();
+    (more.length ? '<section class="band band--soft"><div class="wrap"><div class="sec-head" data-reveal><div><p class="eyebrow">Blog</p><h2>More <em class="ital">stories</em></h2></div></div><div class="posts stagger">' + more.map(postCard).join('') + '</div></div></section>' : '') + bookBand();
+}
+function viewLuxury() {
+  const x = sec('seo_luxury') || {};
+  const s = CUR.settings, book = safeUrl(s.bookingUrl), pg = (CUR.pages || {}).luxury || {};
+  const faqs = (CUR.faqs || []).filter(f => f && f.q && f.a);
+  const strip = galleryItems(CUR).filter(m => m.assetId || m.file).slice(0, 4);
+  const aside = '<aside class="lux-aside"><div class="lux-card" data-reveal="right"><p class="eyebrow">At a glance</p><ul class="lux-facts">' + (s.facts || []).map(factHtml).join('') + '</ul>' +
+    '<div class="btn-col">' + (book ? '<a class="btn btn--primary" href="' + esc(book) + '" target="_blank" rel="noopener">Check availability <span class="arrow">→</span></a>' : '') + '<a class="btn btn--ghost" href="' + LINKS.contact + '">Send an enquiry</a></div>' +
+    '<p class="lux-addr">' + esc(s.address).replace(/\n/g, '<br>') + '</p></div></aside>';
+  return pageHero(pg.eyebrow || 'Udaipur, Rajasthan', pg.title || 'Luxury homestay in Udaipur', pg.lead, pg.photo) +
+    '<section class="band band--tight"><div class="wrap lux-grid"><article class="lux-article post-body prose" data-reveal>' + (x.eyebrow ? '<p class="eyebrow">' + esc(x.eyebrow) + '</p>' : '') + (x.title ? '<h2>' + at(x.title) + '</h2>' : '') + md(x.body) + '</article>' + aside + '</div></section>' +
+    (strip.length ? '<section class="band band--soft band--tight"><div class="wrap"><div class="strip stagger" style="margin-top:0">' + galleryButtons(strip, 'lux') + '</div></div></section>' : '') +
+    (faqs.length ? '<section class="band" id="faq"><div class="wrap">' + shead('FAQ', 'Questions about staying at Devra', '') + '<div class="faq stagger">' + faqs.map((f, i) => '<details class="faq-item"' + (i === 0 ? ' open' : '') + '><summary><span>' + esc(f.q) + '</span><i aria-hidden="true"></i></summary><div class="faq-a">' + paras(f.a) + '</div></details>').join('') + '</div></div></section>' : '') +
+    bookBand();
 }
 function viewContact() {
   const s = CUR.settings;
@@ -643,6 +689,7 @@ function pageHtml() {
     case 'journal': return viewJournal();
     case 'post': return viewPost();
     case 'contact': return viewContact();
+    case 'luxury': return viewLuxury();
     default: return viewHome();
   }
 }
@@ -668,13 +715,28 @@ function render() {
   if (heroTone) { const h = document.getElementById('site-head'); if (h) h.classList.add('is-over', 'tone-' + heroTone); }
   startMotion();
   onScroll();
-  if (PAGE === 'post') { const p = (CUR.posts || []).find(x => x.slug === String(location.hash || '').slice(1)); try { document.title = (p ? p.title + ' · ' : '') + (CUR.settings.siteName || 'Devra Udaipur'); } catch (e) {} }
+  if (PAGE === 'post') { const p = (CUR.posts || []).find(x => x.slug === postSlug()); try { document.title = (p ? p.title + ' · ' : '') + (CUR.settings.siteName || 'Devra Udaipur'); } catch (e) {} }
 }
 
 /* ---------- Motion engine ---------- */
 let rafId = 0, scenes = [], sliderTimer = null, sceneIO = null, countIO = null;
 let pointer = { x: 0, y: 0 };
+let revealIO = null;
+function initReveal() {
+  const root = document.documentElement;
+  if (revealIO) { revealIO.disconnect(); revealIO = null; }
+  if (RM.matches || typeof IntersectionObserver !== 'function') { root.classList.remove('js-motion'); return; }
+  root.classList.add('js-motion');
+  revealIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: 0.08 });
+  APP.querySelectorAll('[data-reveal], .stagger > *').forEach(el => {
+    const par = el.parentElement;
+    if (par && par.classList.contains('stagger')) el.style.setProperty('--d', (Array.prototype.indexOf.call(par.children, el) % 6) * 90 + 'ms');
+    revealIO.observe(el);
+  });
+}
 function stopMotion() {
+  if (revealIO) { revealIO.disconnect(); revealIO = null; }
+  document.documentElement.classList.remove('js-motion');
   cancelAnimationFrame(rafId); rafId = 0; scenes = [];
   clearInterval(sliderTimer); sliderTimer = null;
   if (sceneIO) { sceneIO.disconnect(); sceneIO = null; }
@@ -685,6 +747,7 @@ function startMotion() {
   initScenes();
   initSlider();
   initCounts();
+  initReveal();
 }
 function makeBirds(n) {
   const out = [];
@@ -818,6 +881,13 @@ function onScroll() {
   const over = !!heroTone && window.scrollY < 40 && !ui.menuOpen;
   h.classList.toggle('is-over', over);
   if (heroTone) h.classList.toggle('tone-' + heroTone, over);
+  h.classList.toggle('is-scrolled', window.scrollY > 60);
+  if (!RM.matches && !route.admin) {
+    const y = window.scrollY, vh = window.innerHeight || 800;
+    const hs = APP.querySelector('.hero .hero-slides'), hc = APP.querySelector('.hero .hero-content');
+    if (hs && y < vh * 1.2) hs.style.transform = 'translate3d(0,' + (y * 0.32).toFixed(1) + 'px,0)';
+    if (hc && y < vh * 1.2) { hc.style.opacity = Math.max(0, 1 - y / (vh * 0.75)).toFixed(3); hc.style.transform = 'translate3d(0,' + (y * 0.12).toFixed(1) + 'px,0)'; }
+  }
 }
 
 /* ---------- Lightbox, toast, copy ---------- */
@@ -1109,6 +1179,7 @@ function adminMain() {
     case 'pages': return tabPages();
     case 'experiences': return tabList('experiences', 'Experiences', 'Activities on the Experiences page and in the home page carousel.');
     case 'places': return tabList('places', 'Places', 'Attractions shown on the Explore Udaipur page.');
+    case 'faqs': return tabList('faqs', 'FAQ', 'Questions and answers shown on the Luxury homestay page. Google can show them in search results as FAQs. Keep answers short and factual.');
     case 'stories': return tabList('stories', 'Stories', 'Instagram-style stories on the home page. Each story plays the photos of one category from the Photos tab, full screen, one after another. Order them with the arrows; the first ones show first.');
     case 'reviews': return tabList('reviews', 'Reviews', 'Guest reviews shown on the home page. Add real reviews only, with the guest’s permission. While this list is empty, the home page links to TripAdvisor instead.');
     case 'settings': return tabSettings();
