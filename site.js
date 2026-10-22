@@ -5,11 +5,11 @@
 const APP = document.getElementById('app');
 const PAGE = (APP && APP.dataset.page) || 'home';
 const IS_INDEX = PAGE === 'home';
-const FONT_URL = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rozha+One&display=swap';
+const FONT_URL = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rozha+One&display=swap';
 const RESET = captureReset();
 const RM = (() => { try { return window.matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) { return { matches: false }; } })();
 const LINKS = { home: './', about: 'about.html', stay: 'the-stay.html', experiences: 'experiences.html', udaipur: 'explore-udaipur.html', gallery: 'gallery.html', journal: 'journal.html', contact: 'contact.html' };
-const NAV = [['about', 'About'], ['stay', 'The stay'], ['experiences', 'Experiences'], ['udaipur', 'Explore Udaipur'], ['gallery', 'Gallery'], ['journal', 'Journal'], ['contact', 'Contact']];
+const NAV = [['about', 'About'], ['stay', 'The stay'], ['experiences', 'Experiences'], ['udaipur', 'Explore Udaipur'], ['gallery', 'Gallery'], ['journal', 'Blog'], ['contact', 'Contact']];
 const postUrl = slug => 'post.html#' + slug;
 const adminUrl = () => IS_INDEX ? '#admin' : './#admin';
 
@@ -45,7 +45,7 @@ async function fetchIndexState() {
 function newest(list) { return list.filter(s => s && typeof s === 'object' && s.settings).sort((x, y) => (Number(y.rev) || 0) - (Number(x.rev) || 0))[0] || null; }
 function fixShape(s) {
   ['settings', 'pages', 'sections'].forEach(k => { if (!s[k] || typeof s[k] !== 'object') s[k] = {}; });
-  ['media', 'posts', 'experiences', 'places', 'reviews'].forEach(k => { if (!Array.isArray(s[k])) s[k] = []; });
+  ['media', 'posts', 'experiences', 'places', 'reviews', 'stories'].forEach(k => { if (!Array.isArray(s[k])) s[k] = []; });
   const st = s.settings;
   if (!st.socials) st.socials = {};
   ['facts', 'reach', 'phonesOther', 'heroSlides', 'marquee'].forEach(k => { if (!Array.isArray(st[k])) st[k] = []; });
@@ -66,10 +66,10 @@ const admin = { tab: 'overview', postId: null, preview: false, open: new Set(), 
 const LB_SETS = {};
 let lb = null, picker = null;
 
-const TABS = [['overview', 'Overview'], ['journal', 'Journal'], ['photos', 'Photos'], ['pages', 'Page text'], ['experiences', 'Experiences'], ['places', 'Places'], ['reviews', 'Reviews'], ['settings', 'Site settings']];
+const TABS = [['overview', 'Overview'], ['journal', 'Blog'], ['stories', 'Stories'], ['photos', 'Photos'], ['pages', 'Page text'], ['experiences', 'Experiences'], ['places', 'Places'], ['reviews', 'Reviews'], ['settings', 'Site settings']];
 const SOCIAL_NAMES = { facebook: 'Facebook', instagram: 'Instagram', tripadvisor: 'TripAdvisor', youtube: 'YouTube' };
 const PAGE_GROUPS = [
-  ['Home page', null, ['home_about', 'home_f1', 'home_f2', 'home_f3', 'home_f4', 'home_room', 'home_stay', 'home_cuisine', 'home_band']],
+  ['Home page', null, ['home_about', 'home_f1', 'home_f2', 'home_f3', 'home_f4', 'home_aerial', 'home_room', 'home_stay', 'home_cuisine', 'home_band']],
   ['About', 'about', ['about_devra', 'about_hosts']],
   ['The stay', 'stay', ['stay_leisure', 'stay_rooms', 'stay_band', 'stay_facilities', 'stay_perfect']],
   ['Experiences', 'experiences', ['exp_intro', 'exp_culinary', 'exp_community']],
@@ -79,9 +79,10 @@ const PAGE_GROUPS = [
   ['Contact', null, ['contact_intro']]
 ];
 const LISTS = {
+  stories: { label: 'Story', fields: [['title', 'Title (shown under the circle)', 'text'], ['cover', 'Cover photo (shown in the circle)', 'photo'], ['category', 'Play photos from this category (as named in the Photos tab, e.g. Rooms, Cuisine, Estate, Pool, Lounges)', 'text'], ['caption', 'Text on the first slide (optional)', 'textarea']] },
   experiences: { label: 'Experience', fields: [['title', 'Title', 'text'], ['text', 'Description', 'textarea'], ['photo', 'Photo', 'photo']] },
   places: { label: 'Place', fields: [['name', 'Name', 'text'], ['distance', 'Distance from Udaipur (optional)', 'text'], ['text', 'Description', 'textarea'], ['photo', 'Photo', 'photo']] },
-  reviews: { label: 'Review', fields: [['name', 'Guest name', 'text'], ['from', 'From (city or country)', 'text'], ['quote', 'Review text', 'textarea'], ['source', 'Source, e.g. TripAdvisor', 'text'], ['date', 'Month and year', 'text']] },
+  reviews: { label: 'Review', fields: [['name', 'Guest name', 'text'], ['from', 'From (city or country)', 'text'], ['quote', 'Review text (typed out; shown in handwriting when there is no photo of the note)', 'textarea'], ['photo', 'Photo of the handwritten note (optional, crop it to the note)', 'photo'], ['source', 'Source, e.g. Guest book or TripAdvisor', 'text'], ['date', 'Month and year', 'text']] },
   'settings/facts': { label: 'Fact', fields: [['value', 'Value', 'text'], ['label', 'Label', 'text']] },
   'settings/reach': { label: 'Distance', fields: [['label', 'Place', 'text'], ['value', 'Distance', 'text']] },
   'settings/heroSlides': { label: 'Slide', fields: [['photo', 'Photo', 'photo'], ['caption', 'Caption (optional)', 'text']] }
@@ -342,21 +343,51 @@ function mosaicBand() {
   return '<section class="band band--soft"><div class="wrap"><div class="sec-head" data-reveal><div><p class="eyebrow">Gallery</p><h2>A look around <em class="ital">Devra</em></h2></div><a class="text-link" href="' + LINKS.gallery + '">See all photos <span class="arrow">→</span></a></div>' +
     '<div class="mosaic stagger">' + galleryButtons(feat, 'home') + '</div></div></section>';
 }
+const NOTE_TILT = [-2.2, 1.6, -1.1, 2.3, -1.7, 1.2, -2.6, 0.9];
+function noteCard(x, i, scanIndex) {
+  const tilt = ' style="--tilt:' + NOTE_TILT[i % NOTE_TILT.length] + 'deg"';
+  const meta = [x.source, x.date].filter(Boolean).join(' · ');
+  const who = '<figcaption class="note-who"><span class="hand">' + esc(x.name || 'A guest') + '</span>' + (x.from || meta ? '<small>' + esc([x.from, meta].filter(Boolean).join(' · ')) + '</small>' : '') + '</figcaption>';
+  if (scanIndex >= 0) {
+    return '<figure class="note note--scan"' + tilt + '><span class="tape" aria-hidden="true"></span><button type="button" class="note-open" data-act="lightbox" data-set="notes" data-i="' + scanIndex + '" aria-label="Read the handwritten note from ' + esc(x.name || 'a guest') + '">' +
+      pic(x.photo, { natural: true, label: 'Handwritten note from ' + (x.name || 'a guest') }) + '</button>' + (x.quote ? '<blockquote class="sr">' + esc(x.quote) + '</blockquote>' : '') + who + '</figure>';
+  }
+  return '<figure class="note"' + tilt + '><span class="tape" aria-hidden="true"></span><blockquote class="hand">' + esc(x.quote).replace(/\n/g, '<br>') + '</blockquote>' + who + '</figure>';
+}
 function reviewsBand() {
-  const r = CUR.reviews || [];
+  const r = (CUR.reviews || []).filter(x => x && (x.quote || hasPhoto(x.photo)));
   const ta = safeUrl((CUR.settings.socials || {}).tripadvisor);
   if (!r.length) {
     if (!ta) return '';
-    return '<section class="band"><div class="wrap cta-row" data-reveal><div><p class="eyebrow">Guest reviews</p><h2>Read what guests say about <em class="ital">Devra</em></h2><p class="muted">Reviews from travellers who have stayed with us are on TripAdvisor.</p></div>' +
+    return '<section class="band band--tight"><div class="wrap cta-row" data-reveal><div><p class="eyebrow">Guest reviews</p><h2>Read what guests say about <em class="ital">Devra</em></h2><p class="muted">Reviews from travellers who have stayed with us are on TripAdvisor.</p></div>' +
       '<a class="btn btn--ghost" href="' + esc(ta) + '" target="_blank" rel="noopener">Read reviews on TripAdvisor <span class="arrow">→</span></a></div></section>';
   }
-  return '<section class="band"><div class="wrap"><div class="sec-head" data-reveal><div><p class="eyebrow">Guest reviews</p><h2>What our guests <em class="ital">say</em></h2></div>' + (ta ? '<a class="text-link" href="' + esc(ta) + '" target="_blank" rel="noopener">More on TripAdvisor <span class="arrow">→</span></a>' : '') + '</div>' +
-    '<div class="reviews stagger">' + r.map(x => '<figure class="review"><blockquote>' + esc(x.quote) + '</blockquote><figcaption><strong>' + esc(x.name) + '</strong>' + (x.from ? ', ' + esc(x.from) : '') + (x.source || x.date ? '<br>' + esc([x.source, x.date].filter(Boolean).join(' · ')) : '') + '</figcaption></figure>').join('') + '</div></div></section>';
+  const scans = r.filter(x => hasPhoto(x.photo));
+  LB_SETS.notes = scans.map(x => x.photo);
+  return '<section class="band guestbook" id="guestbook"><div class="wrap">' + shead('Testimonials', 'Notes from our guest book', 'Written by hand by guests before they left Devra.') +
+    '<div class="notes stagger">' + r.map((x, i) => noteCard(x, i, scans.indexOf(x))).join('') + '</div>' +
+    (ta ? '<div class="center-row"><a class="btn btn--ghost" href="' + esc(ta) + '" target="_blank" rel="noopener">More reviews on TripAdvisor <span class="arrow">→</span></a></div>' : '') + '</div></section>';
 }
 function journalBand() {
   const posts = publishedPosts().slice(0, 3);
   if (!posts.length) return '';
-  return '<section class="band"><div class="wrap"><div class="sec-head" data-reveal><div><p class="eyebrow">Journal</p><h2>Stories from the <em class="ital">hillock</em></h2></div><a class="text-link" href="' + LINKS.journal + '">Read the journal <span class="arrow">→</span></a></div><div class="posts stagger">' + posts.map(postCard).join('') + '</div></div></section>';
+  return '<section class="band blog-band"><div class="wrap">' + shead('Blog', 'Stories from the hillock', 'News, recipes and travel notes from Devra, written by the family.') + '<div class="posts stagger">' + posts.map(postCard).join('') + '</div>' +
+    '<div class="center-row"><a class="btn btn--ghost" href="' + LINKS.journal + '">Read the blog <span class="arrow">→</span></a></div></div></section>';
+}
+function instaBand() {
+  const ig = safeUrl((CUR.settings.socials || {}).instagram);
+  if (!ig) return '';
+  const handle = '@' + (ig.replace(/[?#].*$/, '').replace(/\/+$/, '').split('/').pop() || 'devraudaipur');
+  const items = galleryItems(CUR).filter(m => m.assetId || m.file).slice(6, 12);
+  if (!items.length) return '';
+  return '<section class="insta-band"><div class="wrap"><div class="insta-head" data-reveal><div><p class="eyebrow">Follow along</p><h2>' + at('Devra on Instagram') + '</h2></div><a class="btn btn--primary" href="' + esc(ig) + '" target="_blank" rel="noopener">' + icon('instagram') + ' ' + esc(handle) + '</a></div>' +
+    '<div class="insta-grid stagger">' + items.map(m => '<a class="insta-item" href="' + esc(ig) + '" target="_blank" rel="noopener" aria-label="' + esc((m.caption || 'Photo') + ', more on Instagram') + '">' + pic(m, {}) + '<span class="insta-over" aria-hidden="true">' + icon('instagram') + '</span></a>').join('') + '</div></div></section>';
+}
+function roomsGallery() {
+  const rooms = (CUR.media || []).filter(m => (m.assetId || m.file) && String(m.category || '').toLowerCase() === 'rooms' && m.showInGallery !== false).slice(0, 9);
+  if (rooms.length < 3) return '';
+  return '<section class="band band--soft" id="inside-rooms"><div class="wrap">' + shead('Inside the rooms', 'Eight rooms, each with its own character', 'King-size or twin beds, block-printed linen, handpicked art and big windows onto the green.') +
+    '<div class="room-mosaic stagger">' + galleryButtons(rooms, 'rooms') + '</div><div class="center-row"><a class="btn btn--ghost" href="' + LINKS.gallery + '">See all photos <span class="arrow">→</span></a></div></div></section>';
 }
 function routeSvg(stops, vertical) {
   const n = stops.length;
@@ -442,7 +473,8 @@ function numberedRows() {
   if (!keys.length) return '';
   return '<section class="band band--soft"><div class="wrap">' + shead('Devra Udaipur', 'Heritage, nature and home', '') + '<div class="nrows">' + keys.map((k, i) => {
     const x = sec(k), l = NROW_LINKS[k], f = i % 2;
-    return '<article class="nrow' + (f ? ' nrow--flip' : '') + '" id="' + k + '"><div class="nrow-media" data-reveal="' + (f ? 'right' : 'left') + '">' + pic(x.photo, { label: x.title }) + '</div>' +
+    const pm = findMedia(x.photo), wide = !!(pm && pm.w && pm.h && pm.w > pm.h * 1.12);
+    return '<article class="nrow' + (f ? ' nrow--flip' : '') + (wide ? ' nrow--wide' : '') + '" id="' + k + '"><div class="nrow-media" data-reveal="' + (f ? 'right' : 'left') + '">' + pic(x.photo, { label: x.title }) + '</div>' +
       '<div class="nrow-copy" data-reveal="' + (f ? 'left' : 'right') + '"><span class="nnum" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span>' + (x.eyebrow ? '<p class="eyebrow">' + esc(x.eyebrow) + '</p>' : '') + '<h3>' + esc(x.title) + '</h3>' + paras(x.body) +
       (l ? '<a class="btn btn--ghost" href="' + LINKS[l[0]] + '">' + esc(l[1]) + ' <span class="arrow">→</span></a>' : '') + '</div></article>';
   }).join('') + '</div></div></section>';
@@ -486,13 +518,13 @@ function gemsBand() {
     '</div><div class="center-row"><a class="btn btn--ghost" href="' + LINKS.udaipur + '">Explore Udaipur <span class="arrow">→</span></a></div></div></section>';
 }
 function viewHome() {
-  return homeHero() + welcomeBand() + numberedRows() + spacesGrid() + diningSplit() + amenitiesBand() + marquee() + gemsBand() + reviewsBand() + journalBand() + bookBand();
+  return homeHero() + storiesStrip() + welcomeBand() + numberedRows() + photoBand('home_aerial', { full: true, more: [LINKS.gallery, 'See the gallery'] }) + spacesGrid() + diningSplit() + amenitiesBand() + marquee() + gemsBand() + reviewsBand() + journalBand() + instaBand() + bookBand();
 }
 function viewAbout() { return pageHeroFor('about', 'About Devra') + feature('about_devra', { collage: true, badge: 'Atithi Devo Bhava · Guests are gods · ', watermark: 'देवरा' }) + quoteBand() + feature('about_hosts', { flip: true, soft: true }) + routeBand() + bookBand(); }
 function viewStay() {
   const book = safeUrl(CUR.settings.bookingUrl);
   const cta = book ? '<div class="btn-row"><a class="btn btn--primary" href="' + esc(book) + '" target="_blank" rel="noopener">Book a room <span class="arrow">→</span></a></div>' : '';
-  return pageHeroFor('stay', 'The stay') + feature('stay_leisure', { collage: true }) + feature('stay_rooms', { flip: true, soft: true, extra: cta }) + photoBand('stay_band', { full: true }) +
+  return pageHeroFor('stay', 'The stay') + feature('stay_leisure', { collage: true }) + feature('stay_rooms', { flip: true, soft: true, extra: cta }) + roomsGallery() + photoBand('stay_band', { full: true }) +
     feature('stay_facilities') + feature('stay_perfect', { flip: true, soft: true, chips: true }) + feature('home_cuisine', { more: [LINKS.experiences, 'More about our food'] }) + bookBand();
 }
 /* Experiences, structured like padmaajaipur.com/experiences: title + tagline + intro + photos → personalised list → tailor-made → location → outings → editorial rows */
@@ -790,6 +822,48 @@ function onScroll() {
 
 /* ---------- Lightbox, toast, copy ---------- */
 function ensureRoot(id) { let r = document.getElementById(id); if (!r) { r = document.createElement('div'); r.id = id; document.body.appendChild(r); } return r; }
+/* ---------- Stories (Instagram-style, managed in Admin → Stories) ---------- */
+let sv = null, svTimer = null, svReturn = null;
+const STORY_MS = 5200;
+function storyPhotos(st) {
+  const cat = String(st.category || '').toLowerCase().trim();
+  const items = (CUR.media || []).filter(m => (m.assetId || m.file) && m.id !== (CUR.settings || {}).logo);
+  let list = cat ? items.filter(m => String(m.category || '').toLowerCase() === cat && m.showInGallery !== false) : [];
+  const cover = st.cover && findMedia(st.cover);
+  if (cover && (cover.assetId || cover.file)) list = [cover].concat(list.filter(m => m !== cover));
+  return list.slice(0, 12);
+}
+function storyList() { return (CUR.stories || []).filter(x => x && x.title && storyPhotos(x).length); }
+function storiesStrip() {
+  const ss = storyList();
+  if (!ss.length) return '';
+  return '<section class="stories-band" aria-label="Stories"><div class="wrap"><div class="stories-head"><p class="eyebrow">Stories</p><p class="stories-hint">Tap a circle to watch</p></div><div class="stories">' +
+    ss.map((x, i) => '<button type="button" class="story" data-act="story" data-i="' + i + '" aria-label="Watch the story: ' + esc(x.title) + '"><span class="story-ring"><span class="story-img">' + pic(storyPhotos(x)[0], { label: x.title }) + '</span></span><span class="story-name">' + esc(x.title) + '</span></button>').join('') +
+    '</div></div></section>';
+}
+function closeStory() { sv = null; renderStory(); if (svReturn && document.body.contains(svReturn)) svReturn.focus(); }
+function renderStory() {
+  const root = ensureRoot('story-root');
+  clearTimeout(svTimer);
+  if (!sv) { root.innerHTML = ''; document.documentElement.classList.remove('no-scroll'); return; }
+  const ss = storyList();
+  if (!ss[sv.i]) { sv = null; return renderStory(); }
+  let ph = storyPhotos(ss[sv.i]);
+  if (sv.j >= ph.length) { if (sv.i + 1 < ss.length) { sv = { i: sv.i + 1, j: 0 }; return renderStory(); } return closeStory(); }
+  if (sv.j < 0) { if (sv.i > 0) { sv.i--; ph = storyPhotos(ss[sv.i]); sv.j = ph.length - 1; } else sv.j = 0; }
+  const st = ss[sv.i], m = ph[sv.j], src = esc(assetSrc(m));
+  root.innerHTML = '<div class="sv" role="dialog" aria-modal="true" aria-label="Story: ' + esc(st.title) + '"><div class="sv-frame" style="--story-ms:' + STORY_MS + 'ms">' +
+    '<div class="sv-media"><img class="sv-bg" src="' + src + '" alt="" aria-hidden="true"><img class="sv-fg" src="' + src + '" alt="' + esc(m.caption || st.title) + '"></div>' +
+    '<div class="sv-bars" aria-hidden="true">' + ph.map((_, k) => '<span class="sv-bar' + (k < sv.j ? ' done' : k === sv.j ? ' on' : '') + '"><i></i></span>').join('') + '</div>' +
+    '<div class="sv-top"><span class="sv-avatar">' + pic(ph[0], {}) + '</span><span class="sv-who"><strong>' + esc(st.title) + '</strong><small>' + esc((CUR.settings || {}).siteName || 'Devra Udaipur') + '</small></span><button type="button" class="sv-close" data-act="story-close" aria-label="Close story">✕</button></div>' +
+    '<button type="button" class="sv-tap sv-prev" data-act="story-prev" aria-label="Previous photo"></button><button type="button" class="sv-tap sv-next" data-act="story-next" aria-label="Next photo"></button>' +
+    '<div class="sv-cap">' + (st.caption && sv.j === 0 ? '<p class="sv-lead">' + esc(st.caption) + '</p>' : '') + (m.caption ? '<p>' + esc(m.caption) + '</p>' : '') + '</div>' +
+    '<p class="sv-count">' + (sv.i + 1) + ' / ' + ss.length + '</p></div></div>';
+  document.documentElement.classList.add('no-scroll');
+  const nx = ph[sv.j + 1]; if (nx) { const im = new Image(); im.src = assetSrc(nx); }
+  const close = root.querySelector('.sv-close'); if (close) close.focus({ preventScroll: true });
+  if (!RM.matches) svTimer = setTimeout(() => { if (sv) { sv.j++; renderStory(); } }, STORY_MS);
+}
 function renderLightbox() {
   const root = ensureRoot('lb-root');
   if (!lb) { root.innerHTML = ''; return; }
@@ -1009,6 +1083,8 @@ function photoRefs(d) {
   d.experiences.forEach(e => { if (e.photo) refs.push(['experiences/@' + e.id + '/photo', e.photo]); });
   d.places.forEach(p => { if (p.photo) refs.push(['places/@' + p.id + '/photo', p.photo]); });
   (d.settings.heroSlides || []).forEach(s => { if (s.photo) refs.push(['settings/heroSlides/@' + s.id + '/photo', s.photo]); });
+  (d.stories || []).forEach(x => { if (x.cover) refs.push(['stories/@' + x.id + '/cover', x.cover]); });
+  (d.reviews || []).forEach(x => { if (x.photo) refs.push(['reviews/@' + x.id + '/photo', x.photo]); });
   if (d.settings.logo) refs.push(['settings/logo', d.settings.logo]);
   return refs;
 }
@@ -1033,6 +1109,7 @@ function adminMain() {
     case 'pages': return tabPages();
     case 'experiences': return tabList('experiences', 'Experiences', 'Activities on the Experiences page and in the home page carousel.');
     case 'places': return tabList('places', 'Places', 'Attractions shown on the Explore Udaipur page.');
+    case 'stories': return tabList('stories', 'Stories', 'Instagram-style stories on the home page. Each story plays the photos of one category from the Photos tab, full screen, one after another. Order them with the arrows; the first ones show first.');
     case 'reviews': return tabList('reviews', 'Reviews', 'Guest reviews shown on the home page. Add real reviews only, with the guest’s permission. While this list is empty, the home page links to TripAdvisor instead.');
     case 'settings': return tabSettings();
     default: return tabOverview();
@@ -1226,6 +1303,10 @@ function onAct(el, e) {
     case 'slide': if (sliderShow) sliderShow(Number(el.dataset.i) || 0); break;
     case 'rail': { const r = document.getElementById('exp-rail'); if (r) { const card = r.firstElementChild; r.scrollBy({ left: (card ? card.getBoundingClientRect().width + 24 : 300) * Number(el.dataset.dir), behavior: RM.matches ? 'auto' : 'smooth' }); } break; }
     case 'lightbox': lb = { set: el.dataset.set, i: Number(el.dataset.i) || 0 }; renderLightbox(); break;
+    case 'story': sv = { i: Number(el.dataset.i) || 0, j: 0 }; svReturn = el; renderStory(); break;
+    case 'story-close': closeStory(); break;
+    case 'story-prev': if (sv) { sv.j--; renderStory(); } break;
+    case 'story-next': if (sv) { sv.j++; renderStory(); } break;
     case 'lb-close': lb = null; renderLightbox(); break;
     case 'lb-prev': if (lb) { lb.i--; renderLightbox(); } break;
     case 'lb-next': if (lb) { lb.i++; renderLightbox(); } break;
@@ -1336,7 +1417,11 @@ document.addEventListener('toggle', e => { const d = e.target; if (d && d.matche
 document.addEventListener('dragover', e => { const dz = e.target.closest && e.target.closest('.dropzone'); if (dz) { e.preventDefault(); dz.classList.add('is-over'); } });
 document.addEventListener('dragleave', e => { const dz = e.target.closest && e.target.closest('.dropzone'); if (dz && !dz.contains(e.relatedTarget)) dz.classList.remove('is-over'); });
 document.addEventListener('drop', e => { const dz = e.target.closest && e.target.closest('.dropzone'); if (dz) { e.preventDefault(); dz.classList.remove('is-over'); if (e.dataTransfer && e.dataTransfer.files) handleUploadMany(e.dataTransfer.files); } });
+let svTouch = null;
+document.addEventListener('touchstart', e => { if (sv && e.target.closest && e.target.closest('.sv')) { const t = e.touches[0]; svTouch = { x: t.clientX, y: t.clientY }; } }, { passive: true });
+document.addEventListener('touchend', e => { if (!sv || !svTouch) return; const t = e.changedTouches[0], dx = t.clientX - svTouch.x, dy = t.clientY - svTouch.y; svTouch = null; if (dy > 90 && Math.abs(dy) > Math.abs(dx)) closeStory(); else if (Math.abs(dx) > 50) { sv.j += dx < 0 ? 1 : -1; renderStory(); } }, { passive: true });
 document.addEventListener('keydown', e => {
+  if (sv) { if (e.key === 'Escape') closeStory(); else if (e.key === 'ArrowLeft') { sv.j--; renderStory(); } else if (e.key === 'ArrowRight') { sv.j++; renderStory(); } return; }
   if (lb) { if (e.key === 'Escape') { lb = null; renderLightbox(); } else if (e.key === 'ArrowLeft') { lb.i--; renderLightbox(); } else if (e.key === 'ArrowRight') { lb.i++; renderLightbox(); } return; }
   if (e.key === 'Escape' && picker) { picker = null; renderPicker(); return; }
   if (e.key === 'Escape' && ui.menuOpen) setMenu(false);
